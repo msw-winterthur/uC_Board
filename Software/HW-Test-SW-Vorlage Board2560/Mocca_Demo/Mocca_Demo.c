@@ -268,7 +268,7 @@ int main(void)
 		Temp       = read_ADC(13);									// Temperatur
 		JS_x	   = read_ADC(10);									// Joystick x-Achse
 		JS_y	   = read_ADC(11);									// Joystick y-Achse
-		Tasten     = (PINL&0b11110000) | (PINE&0b00000100);			// Tasten 1-4
+		Tasten     = (PINL&0b11000011) | (PINE&0b00000100);			// Tasten 1-4
 		DIP_Switch = PINC;
 		
 		write_zahl(1, 9,Poti_1,4,0,0);								// Potentiometer 1
