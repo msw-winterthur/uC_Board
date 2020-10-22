@@ -216,7 +216,7 @@ void write_next_line(void)
 int main(void)
 {
 	
-	int x_pos, i;
+	int x_pos;
 	u16 Poti_1, Poti_2;
 	u16 Licht, Magnet_1, Magnet_2, Temp;
 	u16 JS_x, JS_y;
@@ -249,7 +249,7 @@ int main(void)
 	while(1)
     {
 		
-		if((PINE >> 4) == 1)
+		if((PINL >> 4) == 1)
 		{
 			for(x_pos=-18; x_pos<Anzahl_Spalten; x_pos++)     // 3x6 = 36 entspricht der Länge des Textes in Pixel.
 			{	write_Text_Matrix(18,"HELLO",1);
@@ -268,7 +268,7 @@ int main(void)
 		Temp       = read_ADC(13);									// Temperatur
 		JS_x	   = read_ADC(10);									// Joystick x-Achse
 		JS_y	   = read_ADC(11);									// Joystick y-Achse
-		Tasten     = PINE>>4;										// Tasten 1-4
+		Tasten     = (PINL&0b11110000) | (PINE&0b00000100);			// Tasten 1-4
 		DIP_Switch = PINC;
 		
 		write_zahl(1, 9,Poti_1,4,0,0);								// Potentiometer 1
@@ -282,7 +282,7 @@ int main(void)
 		write_zahl(3, 5,JS_x,4,0,0);								// Joystick x-Achse
 		write_zahl(3, 9,JS_y,4,0,0);								// Joystick y-Achse
 		
-		write_zahl(3,16,Tasten,4,0,0);								// Tasten 1-4
+		write_zahl(3,16,Tasten,4,0,0);								// Tasten 1-4 und Joystick
 		write_zahl(0,16,DIP_Switch,4,0,0);							// DIP_Switch 1-8
 		
 		PWM_RGB(JS_x/2,Poti_2/2,JS_y/2);							// RGB-LED: rot = JS_x, grün = Poti_2, blau = JS_y
