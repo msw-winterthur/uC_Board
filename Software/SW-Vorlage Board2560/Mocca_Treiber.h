@@ -17,16 +17,6 @@
 #define TRUE !0
 #define u16 unsigned int
 #define u8  unsigned char
-typedef unsigned long int u32;
-
-// Definition für Eingang
-#define Taste_1			(PINE  &  0x10)		//PE.4: Taste 1
-
-// Definition für Ausgang
-#define LED_0_ON					(PORTA |=  0x01)	//PA.0: LED_0 = EIN
-#define LED_0_OFF					(PORTA &= ~0x01)	//PA.0: LED_0 = AUS
-
-
 
 void init_sirius(void);
 void init_mocca(void);

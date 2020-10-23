@@ -2,7 +2,7 @@
 # Automatically-generated file. Do not edit or delete the file
 ################################################################################
 
-Mocca_Demo.c
+main.c
 
 Mocca_Treiber.c
 

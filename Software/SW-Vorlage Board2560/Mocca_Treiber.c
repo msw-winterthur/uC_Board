@@ -30,6 +30,7 @@ void init_sirius(void)
 void init_mocca(void)
 {
 	DDRA = 0xFF;	// LED Port als Ausgang
+	DDRB = 0xFF;	// LED Port als Ausgang
 	DDRK = 0x00;	// Schalter Port als Eingang
 	DDRE = 0x00;	// Taster als Eingang
 	DDRG = 0x27;	// LCD port als Ausgang
@@ -54,7 +55,7 @@ void init_5ms_timer(void)
 	TCCR0A = 0b00000011; // Timer mode einstellungen -> Fast PWM mode
 	TCCR0B = 0b00001101; // 16Mhz / 1024 = 15,635kHz
 	TIMSK0 = 0b00000001; // Timer overflow Interrupt aktivieren
-	OCR0A  = 77;
+	OCR0A = 35; // xyz 77
 }
 
 //--------------------------------------------------------------------------------------------
@@ -66,7 +67,8 @@ ISR(TIMER0_OVF_vect)
 	takt_5ms_zaehler --;
 	time_cnt++;
 	if(time_cnt % 20 == 0) cnt++;
-
+	PORTA = ~cnt;
+	PORTB = ~cnt;
 }
 
 //--------------------------------------------------------------------------------------------
