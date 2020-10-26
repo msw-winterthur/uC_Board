@@ -484,10 +484,9 @@ void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
 {
     uint8_t komma=0;
-    uint64_t zehner = 10;
     char numberBuffer[20];//20stellen dezimal
     char send_buffer[22];//64Bit: 20Stellen dezimal + Komma + Zerotermination
-    uint8_t i, pos, pos_t, posSend, posRead, stellenTotal;
+    uint8_t i, posSend, posRead, stellenTotal;
     uint64_t val=zahl_v;
     
     stellenTotal=s_vk+s_nk;
