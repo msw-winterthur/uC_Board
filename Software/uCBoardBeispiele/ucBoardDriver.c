@@ -123,7 +123,7 @@ ISR(TIMER0_OVF_vect)
 // 5ms Wartefunktion
 //--------------------------------------------------------------------------------------------
 
-uint64_t getSystemTime(void)
+uint64_t getSystemTimeMs(void)
 {
     return systemTimeMs;
 }
@@ -479,19 +479,25 @@ void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 //------------------------------------------------------------
 // Zahl an xy-Position ausgeben dezimal
 //------------------------------------------------------------
-void writeZahl(uint8_t x_pos, uint8_t y_pos, uint16_t zahl_v, uint8_t s_vk, uint8_t s_nk, uint8_t komma)
+void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
 {
-    unsigned long zehner = 10;
-    char send_buffer[12];
+    uint8_t komma=0;
+    uint64_t zehner = 10;
+    char send_buffer[22];//64Bit: 20Stellen dezimal + Komma + Zerotermination
     uint8_t i, pos, pos_t;
+    
+    if (s_nk)
+    {
+        komma=1;
+    }
 
     // Umwandlung in die einzelnen Stellen-Zahlen 1er, 10er, 100er, ...
     //  zahl = 12345;
     //  s_vk = 2;
     //  s_nk = 0;
     //  komma = 0;
-    send_buffer[11] = (zahl_v % 10) + 48;
-    i = 10;
+    send_buffer[21] = (zahl_v % 10) + 48;
+    i = 20;
     do
     { send_buffer[i] = (zahl_v / zehner % 10) + 48;
         zehner *= 10;
@@ -499,7 +505,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint16_t zahl_v, uint8_t s_vk, uint
     
     // Vor-Kommastellen kopieren
     pos = 0;
-    pos_t = 12-komma-s_vk;
+    pos_t = 22-komma-s_vk;
     for (i=0; i<s_vk; i++)
     { send_buffer[pos++] = send_buffer[pos_t++];
     }
@@ -507,7 +513,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint16_t zahl_v, uint8_t s_vk, uint
     { send_buffer[pos++] = '.';
 
         // Nach-Kommastellen kopieren
-        pos_t = 12-komma;
+        pos_t = 22-komma;
         for (i=0; i<s_nk; i++)
         { send_buffer[pos++] = send_buffer[pos_t++];
         }

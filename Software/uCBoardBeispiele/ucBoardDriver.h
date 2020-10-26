@@ -44,7 +44,7 @@ void initBoard (void);
 
 void start5msTick(void);
 void wait5msTick(uint16_t faktor);
-uint64_t getSystemTime(void);
+uint64_t getSystemTimeMs(void);
 
 
 void initRs232 (uint16_t baudratenregister);
@@ -67,7 +67,7 @@ void rgbBlau(uint16_t Blau);
 void initLcd(void);
 void lcdLight(uint8_t hellighkeit);
 void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr);
-void writeZahl(uint8_t x_pos, uint8_t y_pos, uint16_t zahl_v, uint8_t s_vk, uint8_t s_nk, uint8_t komma);
+void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk);
 void clearLcdF(void);
 
 void startMatrix(void);

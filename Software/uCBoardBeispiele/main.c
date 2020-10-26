@@ -6,6 +6,7 @@
 */
 
 #include <avr/io.h>
+#include "ucBoardDriver.h"
 
 
 int main(void)
@@ -18,6 +19,7 @@ int main(void)
     uint8_t schalter;
     uint16_t  counter = 0;
     uint8_t btnJoystick;
+    uint64_t zeit=0;
     
     //Board initialisieren
     initBoard();
@@ -32,7 +34,7 @@ int main(void)
     fillMatrix(0);   // Matrix löschen
     
     //Dauertext auf LCD anzeigen
-    writeText(0,0,"uC-Board   S1-7:    ");
+    writeText(0,0,"uC-Board    s S:    ");
     writeText(1,0,"P1/2:         L:    ");
     writeText(2,0,"M1/2:         C:    ");
     writeText(3,0,"Jx/y:         T:    ");
@@ -56,27 +58,35 @@ int main(void)
         JoyStickY	   = readAdc(ADC_11_JOYSTICK_Y);									// Joystick y-Achse
         tasten     = (PINL&0b11000011);			// Tasten 1-4
         schalter = PINC;
-        
+        zeit = getSystemTimeMs();
         //Verarbeitung--------------------------------------------------------------------
         
-        counter=counter<<1;
-        if(!counter) counter=1;
+        counter=counter>>1;
+        if(!counter) counter=0x8000;
         
         
         //Ausgabe------------------------------------------------------------------
-        writeZahl(1, 9,poti1,4,0,0);								// Potentiometer 1
-        writeZahl(1, 5,poti2,4,0,0);								// Potentiometer 2
-        writeZahl(1,16,licht,4,0,0);								// Lichtsensor
+        writeZahl(1, 9,poti1,4,0);								// Potentiometer 1
+        writeZahl(1, 5,poti2,4,0);								// Potentiometer 2
+        writeZahl(1,16,licht,4,0);								// Lichtsensor
         
-        writeZahl(2, 5,magnet1,4,0,0);							// Magnet 1
-        writeZahl(2, 9,magnet2,4,0,0);							// Magnet 2
-        writeZahl(2,16,temperatur,4,0,0);								// Temperatur
+        writeZahl(2, 5,magnet1,4,0);							// Magnet 1
+        writeZahl(2, 9,magnet2,4,0);							// Magnet 2
+        writeZahl(2,16,temperatur,4,0);								// Temperatur
         
-        writeZahl(3, 5,joyStickX,4,0,0);								// Joystick x-Achse
-        writeZahl(3, 9,JoyStickY,4,0,0);								// Joystick y-Achse
+        writeZahl(3, 5,joyStickX,4,0);								// Joystick x-Achse
+        writeZahl(3, 9,JoyStickY,4,0);								// Joystick y-Achse
         
-        writeZahl(3,16,tasten,4,0,0);								// Tasten 1-4 und Joystick
-        writeZahl(0,17,schalter,3,0,0);							// DIP_Switch 1-8
+        writeZahl(3,16,tasten,4,0);								// Tasten 1-4 und Joystick
+        writeZahl(0,17,schalter,3,0);							// DIP_Switch 1-8
+        if (zeit/1000 <= 9999)
+        {
+            writeZahl(0,8,zeit/1000,4,0);
+        } 
+        else
+        {
+            writeZahl(0,0,zeit/1000,12,0);
+        }
         
         pwmRgb(joyStickX/2,poti2/2,JoyStickY/2);							// RGB-LED: rot = JS_x, grün = Poti_2, blau = JS_y
         
@@ -98,7 +108,7 @@ int main(void)
                 writeTextMatrix(x_pos,"_-->",2);    // Schrift löschen
             }
             //Dauertext wieder anzeigen
-            writeText(0,0,"uC-Board   S1-7:    ");
+            writeText(0,0,"uC-Board    s S:    ");
             writeText(1,0,"P1/2:         L:    ");
             writeText(2,0,"M1/2:         C:    ");
             writeText(3,0,"Jx/y:         T:    ");
