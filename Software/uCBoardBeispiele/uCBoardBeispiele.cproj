@@ -12,18 +12,18 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>SW-Vorlage Board2560</AssemblyName>
-    <Name>SW-Vorlage Board2560</Name>
-    <RootNamespace>SW-Vorlage Board2560</RootNamespace>
+    <AssemblyName>uCBoardBeispiele</AssemblyName>
+    <Name>uCBoardBeispiele</Name>
+    <RootNamespace>uCBoardBeispiele</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
     <ProgFlashFromRam>true</ProgFlashFromRam>
-    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <RamSnippetAddress />
     <UncachedRange />
     <preserveEEPROM>true</preserveEEPROM>
-    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <OverrideVtorValue />
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
@@ -40,22 +40,6 @@
   </dependencies>
 </framework-data>
     </AsfFrameworkConfig>
-    <avrtool>com.atmel.avrdbg.tool.jtagice3plus</avrtool>
-    <avrtoolserialnumber>J30200023074</avrtoolserialnumber>
-    <avrdeviceexpectedsignature>0x1E9801</avrdeviceexpectedsignature>
-    <com_atmel_avrdbg_tool_jtagice3plus>
-      <ToolOptions>
-        <InterfaceProperties>
-          <JtagDbgClock>200000</JtagDbgClock>
-        </InterfaceProperties>
-        <InterfaceName>JTAG</InterfaceName>
-      </ToolOptions>
-      <ToolType>com.atmel.avrdbg.tool.jtagice3plus</ToolType>
-      <ToolNumber>J30200023074</ToolNumber>
-      <ToolName>JTAGICE3</ToolName>
-    </com_atmel_avrdbg_tool_jtagice3plus>
-    <avrtoolinterface>JTAG</avrtoolinterface>
-    <avrtoolinterfaceclock>200000</avrtoolinterfaceclock>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -141,10 +125,10 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Mocca_Treiber.c">
+    <Compile Include="ucBoardDriver.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Mocca_Treiber.h">
+    <Compile Include="ucBoardDriver.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

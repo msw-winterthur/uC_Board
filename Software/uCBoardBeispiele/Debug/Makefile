@@ -38,7 +38,7 @@ SUBDIRS :=
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../main.c \
-../Mocca_Treiber.c
+../ucBoardDriver.c
 
 
 PREPROCESSING_SRCS += 
@@ -49,23 +49,23 @@ ASM_SRCS +=
 
 OBJS +=  \
 main.o \
-Mocca_Treiber.o
+ucBoardDriver.o
 
 OBJS_AS_ARGS +=  \
 main.o \
-Mocca_Treiber.o
+ucBoardDriver.o
 
 C_DEPS +=  \
 main.d \
-Mocca_Treiber.d
+ucBoardDriver.d
 
 C_DEPS_AS_ARGS +=  \
 main.d \
-Mocca_Treiber.d
+ucBoardDriver.d
 
-OUTPUT_FILE_PATH +=SW-Vorlage\ Board2560.elf
+OUTPUT_FILE_PATH +=uCBoardBeispiele.elf
 
-OUTPUT_FILE_PATH_AS_ARGS +="SW-Vorlage Board2560.elf"
+OUTPUT_FILE_PATH_AS_ARGS +=uCBoardBeispiele.elf
 
 ADDITIONAL_DEPENDENCIES:=
 
@@ -84,7 +84,7 @@ LINKER_SCRIPT_DEP+=
 	@echo Finished building: $<
 	
 
-./Mocca_Treiber.o: .././Mocca_Treiber.c
+./ucBoardDriver.o: .././ucBoardDriver.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega2560" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
@@ -117,13 +117,13 @@ all: $(OUTPUT_FILE_PATH) $(ADDITIONAL_DEPENDENCIES)
 $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER_SCRIPT_DEP)
 	@echo Building target: $@
 	@echo Invoking: AVR/GNU Linker : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="SW-Vorlage Board2560.map" -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mrelax -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega2560"  
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="uCBoardBeispiele.map" -Wl,--start-group -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mrelax -mmcu=atmega2560 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega2560"  
 	@echo Finished building target: $@
-	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "SW-Vorlage Board2560.elf" "SW-Vorlage Board2560.hex"
-	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "SW-Vorlage Board2560.elf" "SW-Vorlage Board2560.eep" || exit 0
-	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "SW-Vorlage Board2560.elf" > "SW-Vorlage Board2560.lss"
-	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "SW-Vorlage Board2560.elf" "SW-Vorlage Board2560.srec"
-	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-size.exe" "SW-Vorlage Board2560.elf"
+	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "uCBoardBeispiele.elf" "uCBoardBeispiele.hex"
+	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "uCBoardBeispiele.elf" "uCBoardBeispiele.eep" || exit 0
+	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "uCBoardBeispiele.elf" > "uCBoardBeispiele.lss"
+	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "uCBoardBeispiele.elf" "uCBoardBeispiele.srec"
+	"C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-size.exe" "uCBoardBeispiele.elf"
 	
 	
 
@@ -135,5 +135,5 @@ $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER
 clean:
 	-$(RM) $(OBJS_AS_ARGS) $(EXECUTABLES)  
 	-$(RM) $(C_DEPS_AS_ARGS)   
-	rm -rf "SW-Vorlage Board2560.elf" "SW-Vorlage Board2560.a" "SW-Vorlage Board2560.hex" "SW-Vorlage Board2560.lss" "SW-Vorlage Board2560.eep" "SW-Vorlage Board2560.map" "SW-Vorlage Board2560.srec" "SW-Vorlage Board2560.usersignatures"
+	rm -rf "uCBoardBeispiele.elf" "uCBoardBeispiele.a" "uCBoardBeispiele.hex" "uCBoardBeispiele.lss" "uCBoardBeispiele.eep" "uCBoardBeispiele.map" "uCBoardBeispiele.srec" "uCBoardBeispiele.usersignatures"
 	
