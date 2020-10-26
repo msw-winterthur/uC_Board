@@ -108,7 +108,7 @@ void startSystemTimeMs(void)
 }
 
 //--------------------------------------------------------------------------------------------
-// Timer 0 Overflow Interrupt ->  Wird alle 5ms aufgerufen
+// Timer 0 Overflow Interrupt ->  Wird alle 1ms aufgerufen
 //--------------------------------------------------------------------------------------------
 
 ISR(TIMER0_OVF_vect)
