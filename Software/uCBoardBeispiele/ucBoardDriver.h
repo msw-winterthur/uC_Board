@@ -42,7 +42,7 @@
 
 void initBoard (void);
 
-void start5msTick(void);
+void startSystemTimeMs(void);
 void wait5msTick(uint16_t faktor);
 uint64_t getSystemTimeMs(void);
 

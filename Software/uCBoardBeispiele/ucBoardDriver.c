@@ -65,7 +65,7 @@ void initBoard(void)
     DDRL    = 0x00;//Alles Eingang
     
     //start 5ms tik
-    start5msTick();
+    startSystemTimeMs();
     
     sei();			// Global interrups aktivieren
     //init lcd
@@ -99,12 +99,12 @@ void initBoard(void)
 // Timer 0 initialisirung
 //--------------------------------------------------------------------------------------------
 
-void start5msTick(void)
+void startSystemTimeMs(void)
 {
-    TCCR0A = 0b00000011; // Timer mode einstellungen -> Fast PWM mode
-    TCCR0B = 0b00001101; // 16Mhz / 1024 = 15,635kHz
+    TCCR0A = 0b00000011; // Timer mode einstellungen -> Fast PWM mode 10 Bit
+    TCCR0B = 0b00001011; // 16Mhz / 64 = 250kHz -> 4us per step
     TIMSK0 = 0b00000001; // Timer overflow Interrupt aktivieren
-    OCR0A = 35; // xyz 77
+    OCR0A = 249; // 0 to 249 = 250 steps -> 250steps*4us = 1.000000ms
 }
 
 //--------------------------------------------------------------------------------------------
@@ -113,10 +113,12 @@ void start5msTick(void)
 
 ISR(TIMER0_OVF_vect)
 {
-    takt_5ms_zaehler --;
-    systemTimeMs += 5;
-
-    if(matrixRunning)writeNextLine();
+    systemTimeMs += 1;
+    if (!(systemTimeMs%5))
+    {
+        takt_5ms_zaehler --;
+        if(matrixRunning)writeNextLine();
+    }
 }
 
 //--------------------------------------------------------------------------------------------
@@ -218,7 +220,7 @@ void initAdc(void)
 {
     ADMUX  = 0x40;	//AVCC Als referenz
     DIDR0  = 0x0F;	// Digitale Register an ADC pins der Potentiometer deaktivieren
-    ADCSRA = 0b10100111; // ADC einschalten, ADC clok = 16MHz / 128
+    ADCSRA = 0b10100111; // ADC einschalten, ADC clok = 16MHz / 128 --> 8us/cycle
     ADCSRB = 0x00;	// Free runing mode
     
     ADCSRA |=  0b01000000;		// Dummy messung Starten
@@ -246,7 +248,7 @@ uint16_t readAdc(uint8_t kanal)
     ADCSRA |=  0b01000000;		// ADC Starten
     while((ADCSRA&0x10) == 0);	// Warten bis Messung abgeschllossen
     
-    wait5msTick(1);
+    _delay_us(300);//25 ADC clock cycles
     
     messwert = ADCL;
     messwert |= ADCH <<8;
@@ -483,9 +485,16 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
 {
     uint8_t komma=0;
     uint64_t zehner = 10;
+    char numberBuffer[20];//20stellen dezimal
     char send_buffer[22];//64Bit: 20Stellen dezimal + Komma + Zerotermination
-    uint8_t i, pos, pos_t;
+    uint8_t i, pos, pos_t, posSend, posRead, stellenTotal;
+    uint64_t val=zahl_v;
     
+    stellenTotal=s_vk+s_nk;
+    if(stellenTotal>20){
+        writeText(x_pos, y_pos, "--------------------");
+        return;
+    }
     if (s_nk)
     {
         komma=1;
@@ -496,35 +505,39 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
     //  s_vk = 2;
     //  s_nk = 0;
     //  komma = 0;
-    send_buffer[21] = (zahl_v % 10) + 48;
-    i = 20;
-    do
-    { send_buffer[i] = (zahl_v / zehner % 10) + 48;
-        zehner *= 10;
-    }while(i--);
-    
-    // Vor-Kommastellen kopieren
-    pos = 0;
-    pos_t = 22-komma-s_vk;
-    for (i=0; i<s_vk; i++)
-    { send_buffer[pos++] = send_buffer[pos_t++];
+    for(i=0;i<20;i++){
+        numberBuffer[19-i] = (val % 10)+48;//19=einer, 18=zehner, 17=hunderter....
+        val = val / 10;
     }
-    if (s_nk > 0)
-    { send_buffer[pos++] = '.';
-
-        // Nach-Kommastellen kopieren
-        pos_t = 22-komma;
-        for (i=0; i<s_nk; i++)
-        { send_buffer[pos++] = send_buffer[pos_t++];
-        }
+    //Vorkommastellen kopieren
+    posSend=0;
+    posRead=20-stellenTotal;
+    for (i=0;i<s_vk;i++)
+    {
+        send_buffer[posSend] = numberBuffer[posRead];
+        posSend++;
+        posRead++;
     }
-    send_buffer[pos] = 0;     // Endmarke des Strings setzen
-    
+    //komma
+    if(komma){
+        send_buffer[posSend]='.';
+        posSend++;
+    }
+    //Nachkommastellen kopieren
+    for(i=0;i<s_nk;i++){
+        send_buffer[posSend] = numberBuffer[posRead];
+        posSend++;
+        posRead++;
+    }
+   
+    send_buffer[posSend]=0;
     // Vorangehende Nullen löschen
     i = 0;
     while ( (send_buffer[i] == 48) && (i < s_vk-1) )
     { send_buffer[i++] = 32;
     }
+    
+    
 
     writeText(x_pos, y_pos, send_buffer);
 }
@@ -535,7 +548,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
 void clearLcdF(void)
 {
     writeLcdF('C',0x01);  // Clear Display
-    wait5msTick(1);			// 2ms warten, bis LCD gelöscht ist
+    _delay_ms(2);           // 2ms warten, bis LCD gelöscht ist
     
     writeText(0,0," ");	// Blödes Zeichen auf Disply löschen
 }
