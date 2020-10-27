@@ -30,8 +30,7 @@ int main(void)
     writeZeichenMatrix( 0, 63);
     writeZeichenMatrix(50, 30);
     writeTextMatrix(20,"MSW",1);
-    wait5msTick(500);
-    fillMatrix(0);   // Matrix löschen
+
     
     //Dauertext auf LCD anzeigen
     writeText(0,0,"uC-Board     s S:   ");
@@ -102,9 +101,8 @@ int main(void)
             writeText(2,0,"                    ");
             writeText(3,0,"                    ");
             for(x_pos=-18; x_pos<Anzahl_Spalten; x_pos++)     // 3x6 = 36 entspricht der Länge des Textes in Pixel.
-            {	writeTextMatrix(18,"HELLO",1);
+            {
                 writeTextMatrix(x_pos,"_-->",1);    // Schrift schreiben
-                wait5msTick(8);
                 writeTextMatrix(x_pos,"_-->",2);    // Schrift löschen
             }
             //Dauertext wieder anzeigen

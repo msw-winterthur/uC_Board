@@ -65,9 +65,10 @@ void initBoard(void)
     DDRL    = 0x00;//Alles Eingang
     
     //start 5ms tik
+    sei();			// Global interrups aktivieren
     startSystemTimeMs();
     
-    sei();			// Global interrups aktivieren
+    
     //init lcd
     initLcd();
     //init adc
@@ -117,8 +118,8 @@ ISR(TIMER0_OVF_vect)
     if (!(systemTimeMs%5))
     {
         takt_5ms_zaehler --;
-        if(matrixRunning)writeNextLine();
     }
+    if(matrixRunning)writeNextLine();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -639,7 +640,7 @@ const uint8_t ASCII_Tab[64][10]= {
 
 uint16_t matrix[Anzahl_Spalten];         // Diese Tabelle representiert die einzelnen Pixel der Matrix
 
-uint8_t writeTextFinished = 0;
+volatile uint8_t writeTextFinished = 0;
 
 void startMatrix(void)
 {
@@ -652,8 +653,14 @@ void stopMatrix(void)
 }
 
 void fillMatrix(uint8_t wert)
-{ uint8_t i;
-    //while(write_text_finished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
+{ 
+    uint8_t i;
+    if (!matrixRunning)
+    {
+        return;
+    }
+    writeTextFinished = 0;
+    while(writeTextFinished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
     for(i=0; i<Anzahl_Spalten; i++) matrix[i] = wert;
 }
 
@@ -669,7 +676,12 @@ void fillMatrix(uint8_t wert)
 void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 {
     uint8_t i, breite;
-    
+    if (!matrixRunning)
+    {
+        return;
+    }
+    writeTextFinished = 0;
+    while(writeTextFinished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
     breite = ASCII_Tab[Zeichen_Nr][0];                          // Breite eines Zeichens aus Tabelle lesen
     for (i=0; i<breite; i++)                                    // Je nach Zeichenbreite alle Spalten kopieren
     { if(Matrix_Spalten_Nr+i < Anzahl_Spalten)              // Nicht über die Matrix hinaus schreiben !!!
@@ -696,9 +708,13 @@ void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
 { int16_t matrix_buffer_pos;
     uint8_t breite, i, z_nr;
-    uint8_t str_p = 0;                                            // Dieser Zeiger zeigt auf das zu schreibende Zeichen im Text
-    
-    //while(write_text_finished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
+    uint8_t str_p = 0;                                      // Dieser Zeiger zeigt auf das zu schreibende Zeichen im Text
+    if (!matrixRunning)
+    {
+        return;
+    }
+    writeTextFinished = 0;
+    while(writeTextFinished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
     matrix_buffer_pos = Matrix_Spalten_Nr;
     while (str_ptr[str_p] != 0)
     {
@@ -753,11 +769,12 @@ void writeNextLine(void)
 
     // Die Zeilen werden nacheinander eingeschaltet --> zyklisch 0,1,2,3,4,5,6,7, 0,1,2,3, ...
     if (Zeilen_Nr < 7)
-    { Zeilen_Nr++;
-        writeTextFinished = 0;
+    {
+        Zeilen_Nr++;
     }
     else
-    { Zeilen_Nr = 0;
+    {
+        Zeilen_Nr = 0;
         writeTextFinished = 1;
     }
     
