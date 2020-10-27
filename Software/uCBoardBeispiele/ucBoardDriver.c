@@ -1,9 +1,9 @@
 ﻿/*
- * ucBoardDriver.c
- *
- * Created: 26.10.2020 08:44:34
- *  Author: Dario Dündar
- */ 
+* ucBoardDriver.c
+*
+* Created: 26.10.2020 08:44:34
+*  Author: Dario Dündar
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -13,7 +13,8 @@
 void lcdSid(uint8_t status);
 void lcdSclk(uint8_t status);
 void writeLcdF(uint16_t rs, uint16_t value);
-void writeNextLine(void);
+void matrixWriteNextLine(void);
+void startSystemTimeMs(void);
 
 volatile uint16_t takt_5ms_zaehler;
 static uint8_t matrixRunning = 0;
@@ -77,6 +78,187 @@ void initBoard(void)
     initRgb();
 }
 
+void initPinX1PortD(uint8_t bitNr0_7, ioType_t type)
+{
+    switch (type)
+    {
+        case OUTPUT:
+        DDRD |= (1<<bitNr0_7);//Output
+        break;
+        
+        case INPUT:
+        DDRD &= ~(1<<bitNr0_7);//Input
+        PORTD &= ~(1<<bitNr0_7);//Pullup off
+        break;
+        
+        case INPUT_PULLUP:
+        DDRD &= ~(1<<bitNr0_7);//Input
+        PORTD |= (1<<bitNr0_7);//Pullup on
+        break;
+        
+        case INPUT_ADC://No adc on portD
+        default:
+        break;
+    }
+}
+
+void initPinX4PortL(uint8_t bitNr2_5, ioType_t type)
+{
+    //Andere bits für taster...
+    if ((bitNr2_5<2) || (bitNr2_5>5))
+    {
+        return;
+    }
+    switch (type)
+    {
+        case OUTPUT:
+        DDRL |= (1<<bitNr2_5);//Output
+        break;
+        
+        case INPUT:
+        DDRL &= ~(1<<bitNr2_5);//Input
+        PORTL &= ~(1<<bitNr2_5);//Pullup off
+        break;
+        
+        case INPUT_PULLUP:
+        DDRL &= ~(1<<bitNr2_5);//Input
+        PORTL |= (1<<bitNr2_5);//Pullup on
+        break;
+        
+        case INPUT_ADC://No adc on portL
+        default:
+        break;
+    }
+}
+
+void initPinX4PortF(uint8_t bitNr0_3, ioType_t type)
+{
+    if (bitNr0_3 > 3)
+    {
+        return;
+    }
+    switch (type)
+    {
+        case OUTPUT:
+        DDRF |= (1<<bitNr0_3);//Output
+        break;
+        
+        case INPUT:
+        DIDR0  &= ~(1<<bitNr0_3);	// Digitale In Reg an ADC pins aktivieren
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF &= ~(1<<bitNr0_3);//Pullup off
+        break;
+        
+        case INPUT_ADC:
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF &= ~(1<<bitNr0_3);//Pullup off
+        DIDR0  |= (1<<bitNr0_3);	// Digitale In Reg an ADC pins deaktivieren
+        break;
+        
+        case INPUT_PULLUP:
+        DIDR0  &= ~(1<<bitNr0_3);	// Digitale In Reg an ADC pins aktivieren
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF |= (1<<bitNr0_3);//Pullup on
+        break;
+        
+        default:
+        break;
+    }
+}
+
+void pinWriteX1PortD(uint8_t bitNr0_7, uint8_t val0_1)
+{
+    if (val0_1)
+    {
+        PORTD |= (1<<bitNr0_7);
+    }
+    else
+    {
+        PORTD &= ~(1<<bitNr0_7);
+    }
+}
+
+void pinWriteX4PortL(uint8_t bitNr2_5, uint8_t val0_1)
+{
+    //Andere bits für taster...
+    if ((bitNr2_5<2) || (bitNr2_5>5))
+    {
+        return;
+    }
+    if (val0_1)
+    {
+        PORTL |= (1<<bitNr2_5);
+    }
+    else
+    {
+        PORTL &= ~(1<<bitNr2_5);
+    }
+}
+
+void pinWriteX4PortF(uint8_t bitNr0_3, uint8_t val0_1)
+{
+    if (bitNr0_3 > 3)
+    {
+        return;
+    }
+    if (val0_1)
+    {
+        PORTF |= (1<<bitNr0_3);
+    }
+    else
+    {
+        PORTF &= ~(1<<bitNr0_3);
+    }
+}
+
+void ledWrite(uint8_t bitNr0_15, uint8_t val0_1)
+{
+    if (val0_1)
+    {
+        PORTA &= ~(1<<bitNr0_15);
+        PORTB &= ~((1<<bitNr0_15)>>8);
+        
+    }
+    else
+    {
+        PORTA |= (1<<bitNr0_15);
+        PORTB |= (1<<bitNr0_15)>>8;
+    }
+}
+
+void ledWriteAll(uint16_t bitMuster)
+{
+    PORTA = ~bitMuster;
+    PORTB = ~(bitMuster>>8);
+}
+
+uint8_t pinReadX1PortD(uint8_t bitNr0_7)
+{
+    return PIND & (1<<bitNr0_7);
+}
+
+uint8_t pinReadX4PortL(uint8_t bitNr2_5)
+{
+    return PINL & (1<<bitNr2_5);
+}
+
+uint8_t pinReadX4PortF(uint8_t bitNr0_3)
+{
+    return PINF & (1<<bitNr0_3);
+}
+
+uint8_t switchRead(uint8_t bitNr0_7)
+{
+    return PINC & (1<<bitNr0_7);
+}
+
+uint8_t switchReadAll()
+{
+    return PINC;
+}
+
+
+
 // void init_mocca(void)
 // {
 // 	DDRA = 0xFF;	// LED Port als Ausgang
@@ -119,7 +301,7 @@ ISR(TIMER0_OVF_vect)
     {
         takt_5ms_zaehler --;
     }
-    if(matrixRunning)writeNextLine();
+    if(matrixRunning)matrixWriteNextLine();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -219,8 +401,17 @@ void usbSendeString(char *Text)
 
 void initAdc(void)
 {
+    //PORTF (ADC, X4) Eingang ohne PullUps
+    PORTF   = 0x00;
+    DDRF    = 0x00;
+    //PORTK (ADC-Inputs) alles auf Eingang ohne Pullup
+    PORTK   = 0x00;
+    DDRK    = 0x00;
+    
     ADMUX  = 0x40;	//AVCC Als referenz
     DIDR0  = 0x0F;	// Digitale Register an ADC pins der Potentiometer deaktivieren
+    DIDR2  = 0xFF;
+    
     ADCSRA = 0b10100111; // ADC einschalten, ADC clok = 16MHz / 128 --> 8us/cycle
     ADCSRB = 0x00;	// Free runing mode
     
@@ -230,7 +421,7 @@ void initAdc(void)
     ADCSRA &= 0xEF;				// Interruptflage löschen
 }
 
-uint16_t readAdc(uint8_t kanal)
+uint16_t adcRead(uint8_t kanal)
 {
     uint16_t messwert = 0;
     
@@ -275,13 +466,13 @@ void initRgb(void)
     ICR4H = (aufloesung >>8);
     ICR4L = (aufloesung & 0x00FF);
     
-    pwmRgb(0,0,0);
+    rgbPwm(0,0,0);
 }
 
 //--------------------------------------------------------------------------------------------
 // Übergabe von Werten an die PWM Register
 //--------------------------------------------------------------------------------------------
-void pwmRgb(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
+void rgbPwm(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
 {
     Rot		= 1023 - Rot;
     Gruen	= 1023 - Gruen;
@@ -383,7 +574,7 @@ void initLcd(void)
     writeLcdF('C',0x30);      // set 8-Bit-Interface RE = 0
     writeLcdF('C',0x0C);      // Display ON, Cursor OFF
 
-    clearLcdF();				// Clear Display
+    lcdClear();				// Clear Display
     
     writeLcdF('C',0x07);      // Entry Mode
     lcdLight(0);
@@ -467,7 +658,7 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 // Text an xy-Position ausgeben
 //------------------------------------------------------------
-void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
+void lcdWriteText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 {
     uint8_t str_p = 0;
     uint8_t pos;
@@ -482,7 +673,7 @@ void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 //------------------------------------------------------------
 // Zahl an xy-Position ausgeben dezimal
 //------------------------------------------------------------
-void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
+void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
 {
     uint8_t komma=0;
     char numberBuffer[20];//20stellen dezimal
@@ -492,7 +683,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
     
     stellenTotal=s_vk+s_nk;
     if(stellenTotal>20){
-        writeText(x_pos, y_pos, "--------------------");
+        lcdWriteText(x_pos, y_pos, "--------------------");
         return;
     }
     if (s_nk)
@@ -529,7 +720,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
         posSend++;
         posRead++;
     }
-   
+    
     send_buffer[posSend]=0;
     // Vorangehende Nullen löschen
     i = 0;
@@ -539,18 +730,18 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
     
     
 
-    writeText(x_pos, y_pos, send_buffer);
+    lcdWriteText(x_pos, y_pos, send_buffer);
 }
 
 //------------------------------------------------------------
 // Clear LCD
 //------------------------------------------------------------
-void clearLcdF(void)
+void lcdClear(void)
 {
     writeLcdF('C',0x01);  // Clear Display
     _delay_ms(2);           // 2ms warten, bis LCD gelöscht ist
     
-    writeText(0,0," ");	// Blödes Zeichen auf Disply löschen
+    lcdWriteText(0,0," ");	// Blödes Zeichen auf Disply löschen
 }
 
 //****************************************************************** MATRIX-Treiber ******************************************************************//
@@ -642,18 +833,23 @@ uint16_t matrix[Anzahl_Spalten];         // Diese Tabelle representiert die einz
 
 volatile uint8_t writeTextFinished = 0;
 
-void startMatrix(void)
+void matrixStart(void)
 {
     matrixRunning = 1;
 }
 
-void stopMatrix(void)
+void initMatrix(void)
+{
+    matrixStart();
+}
+
+void matrixStop(void)
 {
     matrixRunning = 0;
 }
 
-void fillMatrix(uint8_t wert)
-{ 
+void matrixFill(uint8_t wert)
+{
     uint8_t i;
     if (!matrixRunning)
     {
@@ -673,7 +869,7 @@ void fillMatrix(uint8_t wert)
 // Output:        Pixelinformationen dieses Zeichens stehen in der Matrix und werden vom Hintergrundtreiber
 //                fortlaufend herausgeschrieben.
 //-------------------------------------------------------------------------------------------------------------
-void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
+void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 {
     uint8_t i, breite;
     if (!matrixRunning)
@@ -705,7 +901,7 @@ void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 //                logic             : 1 =  (Bitmuster der Ziffern)  OR (altem Wert in der Matrix) --> Pixel setzen
 //                logic             : 0 = !(Bitmuster der Ziffern) AND (altem Wert in der Matrix) --> Pixel löschen
 //-------------------------------------------------------------------------------------------------------------
-void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
+void matrixWriteText(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
 { int16_t matrix_buffer_pos;
     uint8_t breite, i, z_nr;
     uint8_t str_p = 0;                                      // Dieser Zeiger zeigt auf das zu schreibende Zeichen im Text
@@ -738,7 +934,7 @@ void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
 
 
 
-void writeNextLine(void)
+void matrixWriteNextLine(void)
 {
     const  uint8_t Bit_Muster_Tab[8] = {1,2,4,8,16,32,64,128};
     static uint16_t Zeilen_Nr, Bit_Muster;

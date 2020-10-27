@@ -33,7 +33,8 @@
 #define ADC_14_MAGNET_1         14
 #define ADC_15_MAGNET_2         15
 
-
+typedef enum ioType_t{OUTPUT, INPUT, INPUT_PULLUP, INPUT_ADC} ioType_t;
+    
 
 // Vom Benutzer vorgegebene Parameter, die sich je nach Matrix-Grösse unterscheiden
 #define Anzahl_Spalten     56             // Wieviele Spalten hat die Matrix?
@@ -42,7 +43,7 @@
 
 void initBoard (void);
 
-void startSystemTimeMs(void);
+
 void wait5msTick(uint16_t faktor);
 uint64_t getSystemTimeMs(void);
 
@@ -56,26 +57,40 @@ void usbSendeZeichen(char zeichen);
 void usbSendeString(char *Text);
 
 void initAdc(void);
-uint16_t readAdc(uint8_t kanal);
+uint16_t adcRead(uint8_t kanal);
 
 void initRgb(void);
-void pwmRgb(uint16_t Rot,uint16_t Gruen,uint16_t Blau);
+void rgbPwm(uint16_t Rot,uint16_t Gruen,uint16_t Blau);
 void rgbRot(uint16_t Rot);
 void rgbGruen(uint16_t Gruen);
 void rgbBlau(uint16_t Blau);
 
 void initLcd(void);
 void lcdLight(uint8_t hellighkeit);
-void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr);
-void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk);
-void clearLcdF(void);
+void lcdWriteText(uint8_t y_pos, uint8_t x_pos, char *str_ptr);
+void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk);
+void lcdClear(void);
 
-void startMatrix(void);
-void stopMatrix(void);
-void fillMatrix(uint8_t wert);
-void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic);
-void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr);
+void initMatrix(void);
+void matrixStart(void);
+void matrixStop(void);
+void matrixFill(uint8_t wert);
+void matrixWriteText(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic);
+void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr);
 
+void initPinX1PortD(uint8_t bitNr0_7, ioType_t type);
+void initPinX4PortL(uint8_t bitNr2_5, ioType_t type);
+void initPinX4PortF(uint8_t bitNr0_3, ioType_t type);
+void pinWriteX1PortD(uint8_t bitNr0_7, uint8_t val0_1);
+void pinWriteX4PortL(uint8_t bitNr2_5, uint8_t val0_1);
+void pinWriteX4PortF(uint8_t bitNr0_3, uint8_t val0_1);
+void ledWrite(uint8_t bitNr0_15, uint8_t val0_1);
+void ledWriteAll(uint16_t bitMuster);
+uint8_t pinReadX1PortD(uint8_t bitNr0_7);
+uint8_t pinReadX4PortL(uint8_t bitNr2_5);
+uint8_t pinReadX4PortF(uint8_t bitNr0_3);
+uint8_t switchRead(uint8_t bitNr0_7);
+uint8_t switchReadAll();
 
 
 #endif /* UCBOARDDRIVER_H_ */
