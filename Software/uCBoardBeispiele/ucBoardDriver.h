@@ -91,6 +91,8 @@ uint8_t pinReadX4PortL(uint8_t bitNr2_5);
 uint8_t pinReadX4PortF(uint8_t bitNr0_3);
 uint8_t switchRead(uint8_t bitNr0_7);
 uint8_t switchReadAll();
+uint8_t buttonReadPortL(uint8_t bitNrPortL);
+uint8_t buttonReadJoyStickPE2(void);
 
 
 #endif /* UCBOARDDRIVER_H_ */

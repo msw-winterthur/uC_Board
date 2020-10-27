@@ -1,9 +1,9 @@
 ﻿/*
- * ucBoardDriver.c
- *
- * Created: 26.10.2020 08:44:34
- *  Author: Dario Dündar
- */ 
+* ucBoardDriver.c
+*
+* Created: 26.10.2020 08:44:34
+*  Author: Dario Dündar
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -13,7 +13,8 @@
 void lcdSid(uint8_t status);
 void lcdSclk(uint8_t status);
 void writeLcdF(uint16_t rs, uint16_t value);
-void writeNextLine(void);
+void matrixWriteNextLine(void);
+void startSystemTimeMs(void);
 
 volatile uint16_t takt_5ms_zaehler;
 static uint8_t matrixRunning = 0;
@@ -65,7 +66,7 @@ void initBoard(void)
     DDRL    = 0x00;//Alles Eingang
     
     //start 5ms tik
-    sei();			// Global interrups aktivieren
+    sei();            // Global interrups aktivieren
     startSystemTimeMs();
     
     
@@ -77,23 +78,214 @@ void initBoard(void)
     initRgb();
 }
 
+void initPinX1PortD(uint8_t bitNr0_7, ioType_t type)
+{
+    switch (type)
+    {
+        case OUTPUT:
+        DDRD |= (1<<bitNr0_7);//Output
+        break;
+        
+        case INPUT:
+        DDRD &= ~(1<<bitNr0_7);//Input
+        PORTD &= ~(1<<bitNr0_7);//Pullup off
+        break;
+        
+        case INPUT_PULLUP:
+        DDRD &= ~(1<<bitNr0_7);//Input
+        PORTD |= (1<<bitNr0_7);//Pullup on
+        break;
+        
+        case INPUT_ADC://No adc on portD
+        default:
+        break;
+    }
+}
+
+void initPinX4PortL(uint8_t bitNr2_5, ioType_t type)
+{
+    //Andere bits für taster...
+    if ((bitNr2_5<2) || (bitNr2_5>5))
+    {
+        return;
+    }
+    switch (type)
+    {
+        case OUTPUT:
+        DDRL |= (1<<bitNr2_5);//Output
+        break;
+        
+        case INPUT:
+        DDRL &= ~(1<<bitNr2_5);//Input
+        PORTL &= ~(1<<bitNr2_5);//Pullup off
+        break;
+        
+        case INPUT_PULLUP:
+        DDRL &= ~(1<<bitNr2_5);//Input
+        PORTL |= (1<<bitNr2_5);//Pullup on
+        break;
+        
+        case INPUT_ADC://No adc on portL
+        default:
+        break;
+    }
+}
+
+void initPinX4PortF(uint8_t bitNr0_3, ioType_t type)
+{
+    if (bitNr0_3 > 3)
+    {
+        return;
+    }
+    switch (type)
+    {
+        case OUTPUT:
+        DDRF |= (1<<bitNr0_3);//Output
+        break;
+        
+        case INPUT:
+        DIDR0  &= ~(1<<bitNr0_3);    // Digitale In Reg an ADC pins aktivieren
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF &= ~(1<<bitNr0_3);//Pullup off
+        break;
+        
+        case INPUT_ADC:
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF &= ~(1<<bitNr0_3);//Pullup off
+        DIDR0  |= (1<<bitNr0_3);    // Digitale In Reg an ADC pins deaktivieren
+        break;
+        
+        case INPUT_PULLUP:
+        DIDR0  &= ~(1<<bitNr0_3);    // Digitale In Reg an ADC pins aktivieren
+        DDRF &= ~(1<<bitNr0_3);//Input
+        PORTF |= (1<<bitNr0_3);//Pullup on
+        break;
+        
+        default:
+        break;
+    }
+}
+
+void pinWriteX1PortD(uint8_t bitNr0_7, uint8_t val0_1)
+{
+    if (val0_1)
+    {
+        PORTD |= (1<<bitNr0_7);
+    }
+    else
+    {
+        PORTD &= ~(1<<bitNr0_7);
+    }
+}
+
+void pinWriteX4PortL(uint8_t bitNr2_5, uint8_t val0_1)
+{
+    //Andere bits für taster...
+    if ((bitNr2_5<2) || (bitNr2_5>5))
+    {
+        return;
+    }
+    if (val0_1)
+    {
+        PORTL |= (1<<bitNr2_5);
+    }
+    else
+    {
+        PORTL &= ~(1<<bitNr2_5);
+    }
+}
+
+void pinWriteX4PortF(uint8_t bitNr0_3, uint8_t val0_1)
+{
+    if (bitNr0_3 > 3)
+    {
+        return;
+    }
+    if (val0_1)
+    {
+        PORTF |= (1<<bitNr0_3);
+    }
+    else
+    {
+        PORTF &= ~(1<<bitNr0_3);
+    }
+}
+
+void ledWrite(uint8_t bitNr0_15, uint8_t val0_1)
+{
+    if (val0_1)
+    {
+        PORTA &= ~(1<<bitNr0_15);
+        PORTB &= ~((1<<bitNr0_15)>>8);
+        
+    }
+    else
+    {
+        PORTA |= (1<<bitNr0_15);
+        PORTB |= (1<<bitNr0_15)>>8;
+    }
+}
+
+void ledWriteAll(uint16_t bitMuster)
+{
+    PORTA = ~bitMuster;
+    PORTB = ~(bitMuster>>8);
+}
+
+uint8_t pinReadX1PortD(uint8_t bitNr0_7)
+{
+    return PIND & (1<<bitNr0_7);
+}
+
+uint8_t pinReadX4PortL(uint8_t bitNr2_5)
+{
+    return PINL & (1<<bitNr2_5);
+}
+
+uint8_t pinReadX4PortF(uint8_t bitNr0_3)
+{
+    return PINF & (1<<bitNr0_3);
+}
+
+uint8_t switchRead(uint8_t bitNr0_7)
+{
+    return PINC & (1<<bitNr0_7);
+}
+
+uint8_t switchReadAll()
+{
+    return PINC;
+}
+
+uint8_t buttonReadPortL(uint8_t bitNrPortL)
+{
+    return PINL & (1<<bitNrPortL);
+}
+
+uint8_t buttonReadJoyStickPE2(void)
+{
+    return (PINE&0b00000100);
+}
+
+
+
 // void init_mocca(void)
 // {
-// 	DDRA = 0xFF;	// LED Port als Ausgang
-// 	DDRB = 0xFF;	// LED Port als Ausgang
-// 	DDRK = 0x00;	// Schalter Port als Eingang
-// 	DDRE = 0x00;	// Taster als Eingang
-// 	DDRG = 0x27;	// LCD port als Ausgang
-// 	DDRH = 0x78;	// RGB, CTS als Ausgang
+//     DDRA = 0xFF;    // LED Port als Ausgang
+//     DDRB = 0xFF;    // LED Port als Ausgang
+//     DDRK = 0x00;    // Schalter Port als Eingang
+//     DDRE = 0x00;    // Taster als Eingang
+//     DDRG = 0x27;    // LCD port als Ausgang
+//     DDRH = 0x78;    // RGB, CTS als Ausgang
 //
-// 	DDRJ = 0xFF;	// LED-Matrix
+//     DDRJ = 0xFF;    // LED-Matrix
 //
-// 	init_5ms_timer();
+//     init_5ms_timer();
 //
-// 	sei();			// Global interrups aktivieren
+//     sei();            // Global interrups aktivieren
 //
-// 	init_lcd();
-// 	lcd_light(10);
+//     init_lcd();
+//     lcd_light(10);
 // }
 
 //--------------------------------------------------------------------------------------------
@@ -119,7 +311,7 @@ ISR(TIMER0_OVF_vect)
     {
         takt_5ms_zaehler --;
     }
-    if(matrixRunning)writeNextLine();
+    if(matrixRunning)matrixWriteNextLine();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -160,7 +352,7 @@ void rs232SendeZeichen(char zeichen)
     UDR2 = zeichen;
     
     while( (UCSR2A & 0b01000000) == 0); // Warten bis Byte gesendet
-    UCSR2A |= 0b01000000;	//Byte gesendet Flagge löschen
+    UCSR2A |= 0b01000000;    //Byte gesendet Flagge löschen
 }
 
 //--------------------------------------------------------------------------------------------
@@ -198,7 +390,7 @@ void usbSendeZeichen(char zeichen)
     UDR0 = zeichen;
     
     while( (UCSR0A & 0b01000000) == 0); // Warten bis Byte gesendet
-    UCSR0A |= 0b01000000;				//Byte gesendet Flagge löschen
+    UCSR0A |= 0b01000000;                //Byte gesendet Flagge löschen
 }
 
 //--------------------------------------------------------------------------------------------
@@ -219,42 +411,51 @@ void usbSendeString(char *Text)
 
 void initAdc(void)
 {
-    ADMUX  = 0x40;	//AVCC Als referenz
-    DIDR0  = 0x0F;	// Digitale Register an ADC pins der Potentiometer deaktivieren
+    //PORTF (ADC, X4) Eingang ohne PullUps
+    PORTF   = 0x00;
+    DDRF    = 0x00;
+    //PORTK (ADC-Inputs) alles auf Eingang ohne Pullup
+    PORTK   = 0x00;
+    DDRK    = 0x00;
+    
+    ADMUX  = 0x40;    //AVCC Als referenz
+    DIDR0  = 0x0F;    // Digitale Register an ADC pins der Potentiometer deaktivieren
+    DIDR2  = 0xFF;
+    
     ADCSRA = 0b10100111; // ADC einschalten, ADC clok = 16MHz / 128 --> 8us/cycle
-    ADCSRB = 0x00;	// Free runing mode
+    ADCSRB = 0x00;    // Free runing mode
     
-    ADCSRA |=  0b01000000;		// Dummy messung Starten
-    while((ADCSRA&0x10) == 0);	// Warten bis Messung abgeschllossen
+    ADCSRA |=  0b01000000;        // Dummy messung Starten
+    while((ADCSRA&0x10) == 0);    // Warten bis Messung abgeschllossen
     
-    ADCSRA &= 0xEF;				// Interruptflage löschen
+    ADCSRA &= 0xEF;                // Interruptflage löschen
 }
 
-uint16_t readAdc(uint8_t kanal)
+uint16_t adcRead(uint8_t kanal)
 {
     uint16_t messwert = 0;
     
     // Kanal definieren
-    ADMUX  = 0x40;	//AVCC Als referenz
+    ADMUX  = 0x40;    //AVCC Als referenz
     if(kanal>=8)
-    {	ADMUX  |= kanal-8;
+    {    ADMUX  |= kanal-8;
         ADCSRB |= (3 << MUX5);
     }
     else
-    {	ADMUX  |= kanal;
+    {    ADMUX  |= kanal;
         ADCSRB &= ~(3 << MUX5);
     }
     
     
-    ADCSRA |=  0b01000000;		// ADC Starten
-    while((ADCSRA&0x10) == 0);	// Warten bis Messung abgeschllossen
+    ADCSRA |=  0b01000000;        // ADC Starten
+    while((ADCSRA&0x10) == 0);    // Warten bis Messung abgeschllossen
     
     _delay_us(300);//25 ADC clock cycles
     
     messwert = ADCL;
     messwert |= ADCH <<8;
     
-    ADCSRA &= 0xEF;				// Interruptflage löschen
+    ADCSRA &= 0xEF;                // Interruptflage löschen
     
     return messwert;
 }
@@ -275,17 +476,17 @@ void initRgb(void)
     ICR4H = (aufloesung >>8);
     ICR4L = (aufloesung & 0x00FF);
     
-    pwmRgb(0,0,0);
+    rgbPwm(0,0,0);
 }
 
 //--------------------------------------------------------------------------------------------
 // Übergabe von Werten an die PWM Register
 //--------------------------------------------------------------------------------------------
-void pwmRgb(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
+void rgbPwm(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
 {
-    Rot		= 1023 - Rot;
-    Gruen	= 1023 - Gruen;
-    Blau	= 1023 - Blau;
+    Rot        = 1023 - Rot;
+    Gruen    = 1023 - Gruen;
+    Blau    = 1023 - Blau;
     
     OCR4AH = (Rot >>8);
     OCR4AL = (Rot & 0x00FF);
@@ -300,11 +501,11 @@ void pwmRgb(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
 void rgbRot(uint16_t Rot)
 {
     // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Rot)	PORTH |= 0x08;
+    if(Rot)    PORTH |= 0x08;
     else PORTH &= 0xF7;
     
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Rot		= 1023 - Rot;
+    Rot        = 1023 - Rot;
     OCR4AH = (Rot >>8);
     OCR4AL = (Rot & 0x00FF);
 }
@@ -312,11 +513,11 @@ void rgbRot(uint16_t Rot)
 void rgbGruen(uint16_t Gruen)
 {
     // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Gruen)	PORTH |= 0x10;
+    if(Gruen)    PORTH |= 0x10;
     else PORTH &= 0xEF;
     
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Gruen	= 1023 - Gruen;
+    Gruen    = 1023 - Gruen;
     OCR4BH = (Gruen >>8);
     OCR4BL = (Gruen & 0x00FF);
 }
@@ -324,11 +525,11 @@ void rgbGruen(uint16_t Gruen)
 void rgbBlau(uint16_t Blau)
 {
     // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Blau)	PORTH |= 0x20;
+    if(Blau)    PORTH |= 0x20;
     else PORTH &= 0xDF;
     
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Blau	= 1023 - Blau;
+    Blau    = 1023 - Blau;
     OCR4CH = (Blau >>8);
     OCR4CL = (Blau & 0x00FF);
 }
@@ -338,15 +539,15 @@ void rgbBlau(uint16_t Blau)
 //--------------------------------------------------------------------------------------------
 // Ansteuerung von einzelen Bits fur LCD
 //--------------------------------------------------------------------------------------------
-void lcdSid(uint8_t status)		// LCD Datenleitung
+void lcdSid(uint8_t status)        // LCD Datenleitung
 {
-    if(status)	PORTG |= 0x01;
+    if(status)    PORTG |= 0x01;
     else PORTG &= 0xFE;
 }
 
-void lcdSclk(uint8_t status)		// LCD Taktleitung
+void lcdSclk(uint8_t status)        // LCD Taktleitung
 {
-    if(status)	PORTG |= 0x02;
+    if(status)    PORTG |= 0x02;
     else PORTG &= 0xFD;
 }
 
@@ -383,7 +584,7 @@ void initLcd(void)
     writeLcdF('C',0x30);      // set 8-Bit-Interface RE = 0
     writeLcdF('C',0x0C);      // Display ON, Cursor OFF
 
-    clearLcdF();				// Clear Display
+    lcdClear();                // Clear Display
     
     writeLcdF('C',0x07);      // Entry Mode
     lcdLight(0);
@@ -399,28 +600,28 @@ void writeLcdF(uint16_t rs, uint16_t value)
     // minimale Pulslänge von 400ns eingehalten wird. (bei 20MHz)
 
     // Synchronisierung: 5x "1" senden
-    lcdSid(1);				// Daten-Bit = 1
+    lcdSid(1);                // Daten-Bit = 1
     for(i=0;i<5; i++)
     {
-        lcdSclk(0);			// Synch-Bits senden
+        lcdSclk(0);            // Synch-Bits senden
         lcdSclk(1);
     }
     // R/W: 1=Read, 0=Write
-    lcdSid(0);				    // R/W = 0
-    lcdSclk(0);				// R/W-Bit senden
+    lcdSid(0);                    // R/W = 0
+    lcdSclk(0);                // R/W-Bit senden
     lcdSclk(1);
 
     // RS Register Selection: 0=Command, 1=Data
     if (rs == 'C') lcdSid(0);
     else lcdSid(1);
 
-    lcdSclk(0);				// RS-Bit senden
+    lcdSclk(0);                // RS-Bit senden
     lcdSclk(1);
 
     // End-Marke 0
     lcdSid(0);
     
-    lcdSclk(0);				// END-Bit senden
+    lcdSclk(0);                // END-Bit senden
     lcdSclk(1);
     
     // Daten-Bit 0-3
@@ -434,7 +635,7 @@ void writeLcdF(uint16_t rs, uint16_t value)
         lcdSclk(1);
     }
 
-    lcdSid(0);		// 4x "0" senden
+    lcdSid(0);        // 4x "0" senden
     for(i=0;i<4; i++)
     {
         lcdSclk(0);
@@ -452,7 +653,7 @@ void writeLcdF(uint16_t rs, uint16_t value)
         lcdSclk(1);
     }
     
-    lcdSid(0);			// 4x "0" senden
+    lcdSid(0);            // 4x "0" senden
     for(i=0;i<4; i++)
     {
         lcdSclk(0);
@@ -467,7 +668,7 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 // Text an xy-Position ausgeben
 //------------------------------------------------------------
-void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
+void lcdWriteText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 {
     uint8_t str_p = 0;
     uint8_t pos;
@@ -482,7 +683,7 @@ void writeText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
 //------------------------------------------------------------
 // Zahl an xy-Position ausgeben dezimal
 //------------------------------------------------------------
-void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
+void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
 {
     uint8_t komma=0;
     char numberBuffer[20];//20stellen dezimal
@@ -492,7 +693,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
     
     stellenTotal=s_vk+s_nk;
     if(stellenTotal>20){
-        writeText(x_pos, y_pos, "--------------------");
+        lcdWriteText(x_pos, y_pos, "--------------------");
         return;
     }
     if (s_nk)
@@ -529,7 +730,7 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
         posSend++;
         posRead++;
     }
-   
+    
     send_buffer[posSend]=0;
     // Vorangehende Nullen löschen
     i = 0;
@@ -539,18 +740,18 @@ void writeZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint
     
     
 
-    writeText(x_pos, y_pos, send_buffer);
+    lcdWriteText(x_pos, y_pos, send_buffer);
 }
 
 //------------------------------------------------------------
 // Clear LCD
 //------------------------------------------------------------
-void clearLcdF(void)
+void lcdClear(void)
 {
     writeLcdF('C',0x01);  // Clear Display
     _delay_ms(2);           // 2ms warten, bis LCD gelöscht ist
     
-    writeText(0,0," ");	// Blödes Zeichen auf Disply löschen
+    lcdWriteText(0,0," ");    // Blödes Zeichen auf Disply löschen
 }
 
 //****************************************************************** MATRIX-Treiber ******************************************************************//
@@ -570,90 +771,95 @@ void clearLcdF(void)
 
 //------------------------------------------------------------------------------------
 
-//							        Länge,Spalten ...                              Nr.
+//                                    Länge,Spalten ...                              Nr.
 const uint8_t ASCII_Tab[64][10]= {
-    {4,  0,  0,  0,  0,  0,  0,  0,	0,  0},		//  0    " "
-    {5,  0,  0, 95,  0,  0,  0,  0,	0,  0},		//  1    !
-    {5,  0,  7,  0,  7,  0,  0,  0,	0,  0},		//  2    "
-    {5, 20,127, 20,127, 20,  0,  0,	0,  0},		//  3    #
-    {5,  4, 42,107, 42, 16,  0,  0,	0,  0},		//  4    $
-    {5, 35, 19,  8,100, 98,  0,  0,	0,  0},		//  5    %
-    {5, 54, 73, 85, 34, 80,  0,  0,	0,  0},		//  6    &
-    {4,  0,  5,  3,  0,  0,  0,  0,	0,  0},		//  7    '
-    {5,  0, 28, 34, 65,  0,  0,  0,	0,  0},		//  8    (
-    {5,  0, 65, 34, 28,  0,  0,  0,	0,  0},		//  9    )
-    {5, 20,  8, 62,  8, 20,  0,  0,	0,  0},		// 10    *
-    {5,  8,  8, 62,  8,  8,  0,  0,	0,  0},		// 11    +
-    {4,  0, 80, 48,  0,  0,  0,  0,	0,  0},		// 12    ,
-    {5,  8,  8,  8,  8,  8,  0,  0,	0,  0},		// 13    -
-    {4,  0, 96, 96,  0,  0,  0,  0,	0,  0},		// 14    .
-    {5, 16,  8,  4,  2,  1,  0,  0,	0,  0},		// 15    /
-    {5, 62, 65, 65, 65, 62,  0,  0,	0,  0},		// 16    0
-    {3, 66,127, 64,  0,  0,  0,  0,	0,  0},		// 17    1
-    {5, 66, 97, 81, 73, 70,  0,  0,	0,  0},		// 18    2
-    {5, 34, 65, 73, 73, 54,  0,  0,	0,  0},		// 19    3
-    {5, 24, 20, 18,127, 16,  0,  0,	0,  0},		// 20    4
-    {5, 39, 69, 69, 69, 57,  0,  0,	0,  0},		// 21    5
-    {5, 60, 74, 73, 73, 48,  0,  0,	0,  0},		// 22    6
-    {5,  1,113,  9,  5,  3,  0,  0,	0,  0},		// 23    7
-    {5, 54, 73, 73, 73, 54,  0,  0,	0,  0},		// 24    8
-    {5,  6, 73, 73, 41, 30,  0,  0,	0,  0},		// 25    9
-    {5, 54, 54,  0,  0,  0,  0,  0,	0,  0},		// 26    :
-    {5, 86, 54,  0,  0,  0,  0,  0,	0,  0},		// 27    ;
-    {5,  8, 20, 34, 65,  0,  0,  0,	0,  0},		// 28    <
-    {5, 20, 20, 20, 20, 20,  0,  0,	0,  0},		// 29    =
-    {5, 65, 34, 20,  8,  0,  0,  0,	0,  0},		// 30    >
-    {5,  2,  1, 81,  9,  6,  0,  0,	0,  0},		// 31    ?
-    {5, 62, 65, 93, 85, 30,  0,  0,	0,  0},		// 32    @
-    {5,126, 17, 17, 17,126,  0,  0,	0,  0},		// 33    A
-    {5,127, 73, 73, 73, 54,  0,  0,	0,  0},		// 34    B
-    {5, 62, 65, 65, 65, 34,  0,  0,	0,  0},		// 35    C
-    {5,127, 65, 65, 34, 28,  0,  0,	0,  0},		// 36    D
-    {5,127, 73, 73, 73, 65,  0,  0,	0,  0},		// 37    E
-    {5,127,  9,  9,  9,  1,  0,  0,	0,  0},		// 38    F
-    {5, 62, 65, 73, 73,122,  0,  0,	0,  0},		// 39    G
-    {5,127,  8,  8,  8,127,  0,  0,	0,  0},		// 40    H
-    {3, 65,127, 65,  0,  0,  0,  0,	0,  0}, 		// 41    I
-    {5, 32, 64, 65, 63,  1,  0,  0,	0,  0},		// 42    J
-    {5,127,  8, 20, 34, 65,  0,  0,	0,  0},		// 43    K
-    {5,127, 64, 64, 64, 64,  0,  0,	0,  0},		// 44    L
-    {5,127,  2, 12,  2,127,  0,  0,	0,  0},		// 45    M
-    {5,127,  4,  8, 16,127,  0,  0,	0,  0}, 		// 46    N
-    {5, 62, 65, 65, 65, 62,  0,  0,	0,  0},		// 47    O
-    {5,127,  9,  9,  9,  6,  0,  0,	0,  0},		// 48    P
-    {5, 62, 65, 81, 33, 94,  0,  0,	0,  0},		// 49    Q
-    {5,127,  9, 25, 41, 70,  0,  0,	0,  0},		// 50    R
-    {5, 70, 73, 73, 73, 49,  0,  0,	0,  0},		// 51    S
-    {5,  1,  1,127,  1,  1,  0,  0,	0,  0},		// 52    T
-    {5, 63, 64, 64, 64, 63,  0,  0,	0,  0},		// 53    U
-    {5, 31, 32, 64, 32, 31,  0,  0,	0,  0},		// 54    V
-    {5, 63, 64, 48, 64, 63,  0,  0,	0,  0},		// 55    W
-    {5, 99, 20,  8, 20, 99,  0,  0,	0,  0},		// 56    X
-    {5,  7,  8,112,  8,  7,  0,  0,	0,  0},		// 57    Y
-    {5, 97, 81, 73, 69, 67,  0,  0,	0,  0},		// 58    Z
-    {2,127,127,  0,  0,  0,  0,  0,	0,  0}, 		// 59
-    {6,124,126, 27, 27,126,124,  0,	0,  0}, 		// 60
-    {6,124,126, 27, 27,126,124,  0,	0,  0}, 		// 61
-    {7,127,127,  6, 12, 24, 63,127,	0,  0},      // 62
-    {7, 62,73, 85,	81,	85,	73,	62, 0,  0}
-};		// 63    Smile
+    {4,  0,  0,  0,  0,  0,  0,  0,    0,  0},        //  0    " "
+    {5,  0,  0, 95,  0,  0,  0,  0,    0,  0},        //  1    !
+    {5,  0,  7,  0,  7,  0,  0,  0,    0,  0},        //  2    "
+    {5, 20,127, 20,127, 20,  0,  0,    0,  0},        //  3    #
+    {5,  4, 42,107, 42, 16,  0,  0,    0,  0},        //  4    $
+    {5, 35, 19,  8,100, 98,  0,  0,    0,  0},        //  5    %
+    {5, 54, 73, 85, 34, 80,  0,  0,    0,  0},        //  6    &
+    {4,  0,  5,  3,  0,  0,  0,  0,    0,  0},        //  7    '
+    {5,  0, 28, 34, 65,  0,  0,  0,    0,  0},        //  8    (
+    {5,  0, 65, 34, 28,  0,  0,  0,    0,  0},        //  9    )
+    {5, 20,  8, 62,  8, 20,  0,  0,    0,  0},        // 10    *
+    {5,  8,  8, 62,  8,  8,  0,  0,    0,  0},        // 11    +
+    {4,  0, 80, 48,  0,  0,  0,  0,    0,  0},        // 12    ,
+    {5,  8,  8,  8,  8,  8,  0,  0,    0,  0},        // 13    -
+    {4,  0, 96, 96,  0,  0,  0,  0,    0,  0},        // 14    .
+    {5, 16,  8,  4,  2,  1,  0,  0,    0,  0},        // 15    /
+    {5, 62, 65, 65, 65, 62,  0,  0,    0,  0},        // 16    0
+    {3, 66,127, 64,  0,  0,  0,  0,    0,  0},        // 17    1
+    {5, 66, 97, 81, 73, 70,  0,  0,    0,  0},        // 18    2
+    {5, 34, 65, 73, 73, 54,  0,  0,    0,  0},        // 19    3
+    {5, 24, 20, 18,127, 16,  0,  0,    0,  0},        // 20    4
+    {5, 39, 69, 69, 69, 57,  0,  0,    0,  0},        // 21    5
+    {5, 60, 74, 73, 73, 48,  0,  0,    0,  0},        // 22    6
+    {5,  1,113,  9,  5,  3,  0,  0,    0,  0},        // 23    7
+    {5, 54, 73, 73, 73, 54,  0,  0,    0,  0},        // 24    8
+    {5,  6, 73, 73, 41, 30,  0,  0,    0,  0},        // 25    9
+    {5, 54, 54,  0,  0,  0,  0,  0,    0,  0},        // 26    :
+    {5, 86, 54,  0,  0,  0,  0,  0,    0,  0},        // 27    ;
+    {5,  8, 20, 34, 65,  0,  0,  0,    0,  0},        // 28    <
+    {5, 20, 20, 20, 20, 20,  0,  0,    0,  0},        // 29    =
+    {5, 65, 34, 20,  8,  0,  0,  0,    0,  0},        // 30    >
+    {5,  2,  1, 81,  9,  6,  0,  0,    0,  0},        // 31    ?
+    {5, 62, 65, 93, 85, 30,  0,  0,    0,  0},        // 32    @
+    {5,126, 17, 17, 17,126,  0,  0,    0,  0},        // 33    A
+    {5,127, 73, 73, 73, 54,  0,  0,    0,  0},        // 34    B
+    {5, 62, 65, 65, 65, 34,  0,  0,    0,  0},        // 35    C
+    {5,127, 65, 65, 34, 28,  0,  0,    0,  0},        // 36    D
+    {5,127, 73, 73, 73, 65,  0,  0,    0,  0},        // 37    E
+    {5,127,  9,  9,  9,  1,  0,  0,    0,  0},        // 38    F
+    {5, 62, 65, 73, 73,122,  0,  0,    0,  0},        // 39    G
+    {5,127,  8,  8,  8,127,  0,  0,    0,  0},        // 40    H
+    {3, 65,127, 65,  0,  0,  0,  0,    0,  0},         // 41    I
+    {5, 32, 64, 65, 63,  1,  0,  0,    0,  0},        // 42    J
+    {5,127,  8, 20, 34, 65,  0,  0,    0,  0},        // 43    K
+    {5,127, 64, 64, 64, 64,  0,  0,    0,  0},        // 44    L
+    {5,127,  2, 12,  2,127,  0,  0,    0,  0},        // 45    M
+    {5,127,  4,  8, 16,127,  0,  0,    0,  0},         // 46    N
+    {5, 62, 65, 65, 65, 62,  0,  0,    0,  0},        // 47    O
+    {5,127,  9,  9,  9,  6,  0,  0,    0,  0},        // 48    P
+    {5, 62, 65, 81, 33, 94,  0,  0,    0,  0},        // 49    Q
+    {5,127,  9, 25, 41, 70,  0,  0,    0,  0},        // 50    R
+    {5, 70, 73, 73, 73, 49,  0,  0,    0,  0},        // 51    S
+    {5,  1,  1,127,  1,  1,  0,  0,    0,  0},        // 52    T
+    {5, 63, 64, 64, 64, 63,  0,  0,    0,  0},        // 53    U
+    {5, 31, 32, 64, 32, 31,  0,  0,    0,  0},        // 54    V
+    {5, 63, 64, 48, 64, 63,  0,  0,    0,  0},        // 55    W
+    {5, 99, 20,  8, 20, 99,  0,  0,    0,  0},        // 56    X
+    {5,  7,  8,112,  8,  7,  0,  0,    0,  0},        // 57    Y
+    {5, 97, 81, 73, 69, 67,  0,  0,    0,  0},        // 58    Z
+    {2,127,127,  0,  0,  0,  0,  0,    0,  0},         // 59
+    {6,124,126, 27, 27,126,124,  0,    0,  0},         // 60
+    {6,124,126, 27, 27,126,124,  0,    0,  0},         // 61
+    {7,127,127,  6, 12, 24, 63,127,    0,  0},      // 62
+    {7, 62,73, 85,    81,    85,    73,    62, 0,  0}
+};        // 63    Smile
 
 uint16_t matrix[Anzahl_Spalten];         // Diese Tabelle representiert die einzelnen Pixel der Matrix
 
 volatile uint8_t writeTextFinished = 0;
 
-void startMatrix(void)
+void matrixStart(void)
 {
     matrixRunning = 1;
 }
 
-void stopMatrix(void)
+void initMatrix(void)
+{
+    matrixStart();
+}
+
+void matrixStop(void)
 {
     matrixRunning = 0;
 }
 
-void fillMatrix(uint8_t wert)
-{ 
+void matrixFill(uint8_t wert)
+{
     uint8_t i;
     if (!matrixRunning)
     {
@@ -673,7 +879,7 @@ void fillMatrix(uint8_t wert)
 // Output:        Pixelinformationen dieses Zeichens stehen in der Matrix und werden vom Hintergrundtreiber
 //                fortlaufend herausgeschrieben.
 //-------------------------------------------------------------------------------------------------------------
-void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
+void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 {
     uint8_t i, breite;
     if (!matrixRunning)
@@ -705,7 +911,7 @@ void writeZeichenMatrix(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 //                logic             : 1 =  (Bitmuster der Ziffern)  OR (altem Wert in der Matrix) --> Pixel setzen
 //                logic             : 0 = !(Bitmuster der Ziffern) AND (altem Wert in der Matrix) --> Pixel löschen
 //-------------------------------------------------------------------------------------------------------------
-void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
+void matrixWriteText(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
 { int16_t matrix_buffer_pos;
     uint8_t breite, i, z_nr;
     uint8_t str_p = 0;                                      // Dieser Zeiger zeigt auf das zu schreibende Zeichen im Text
@@ -738,7 +944,7 @@ void writeTextMatrix(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
 
 
 
-void writeNextLine(void)
+void matrixWriteNextLine(void)
 {
     const  uint8_t Bit_Muster_Tab[8] = {1,2,4,8,16,32,64,128};
     static uint16_t Zeilen_Nr, Bit_Muster;
@@ -761,7 +967,7 @@ void writeNextLine(void)
         CLOCK_0;                            // Datenbit wird bei der negativen Flanke des Clock-Signals übernommen
     }
     
-    ENABLE_0;	                            // +5V aller Zeilen abschalten
+    ENABLE_0;                                // +5V aller Zeilen abschalten
     PORTJ &= ~0x07;
     PORTJ |= Zeilen_Nr;                     // gewünschte Zeile einstellen
     STROBE_1;                             // Daten ins Latch schreiben
