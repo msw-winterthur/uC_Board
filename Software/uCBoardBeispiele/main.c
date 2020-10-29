@@ -49,7 +49,6 @@ int main(void)
         btnJoystick = buttonReadJoyStickPE2();
 
         poti1       = adcRead(ADC_08_POTI_1);                   // Potentiometer 1
-        poti1       = adcRead(ADC_02_X4_PORTF_BIT2);            // Potentiometer 1
         poti2       = adcRead(ADC_09_POTI_2);                   // Potentiometer 2
         licht       = adcRead(ADC_12_LICHT);                    // Lichtsensor
         magnet1     = adcRead(ADC_14_MAGNET_1);                 // Magnet 1
