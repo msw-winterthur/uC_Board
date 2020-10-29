@@ -20,6 +20,9 @@ int main(void)
     uint16_t  counter = 0;
     uint8_t btnJoystick;
     uint64_t zeit=0;
+    uint16_t rot=0;
+    uint16_t gruen=0;
+    uint16_t blau=0;
     
     //Board initialisieren
     initBoard();
@@ -52,8 +55,8 @@ int main(void)
         magnet1     = adcRead(ADC_14_MAGNET_1);                 // Magnet 1
         magnet2     = adcRead(ADC_15_MAGNET_2);                 // Magnet 2
         temperatur  = adcRead(ADC_13_TEMPERATUR);               // Temperatur
-        joyStickX    = adcRead(ADC_10_JOYSTICK_X);              // Joystick x-Achse
-        JoyStickY    = adcRead(ADC_11_JOYSTICK_Y);              // Joystick y-Achse
+        joyStickX   = adcRead(ADC_10_JOYSTICK_X);               // Joystick x-Achse
+        JoyStickY   = adcRead(ADC_11_JOYSTICK_Y);               // Joystick y-Achse
         tasteS1     = buttonReadPortL(0);                       // Tasten 1-4
         tasteS2     = buttonReadPortL(1);
         tasteS3     = buttonReadPortL(6);
@@ -65,6 +68,24 @@ int main(void)
         counter=counter>>1;
         if(!counter) counter=0x8000;
         
+        if (tasteS1)
+        {
+            rot=1023;
+        }
+        if (tasteS2)
+        {
+            gruen=1023;
+        }
+        if (tasteS3)
+        {
+            blau=1023;
+        }
+        if (tasteS4)
+        {
+            rot=0;
+            gruen=0;
+            blau=0;
+        }
         
         //Ausgabe------------------------------------------------------------------
         lcdWriteZahl(1, 9,poti1,4,0);                           // Potentiometer 1
@@ -89,7 +110,7 @@ int main(void)
             lcdWriteZahl(0,0,zeit,9,3);
         }
         
-        rgbPwm(joyStickX/2,poti2/2,JoyStickY/2);                // RGB-LED: rot = JS_x, grün = Poti_2, blau = JS_y
+        rgbPwm(rot,gruen,blau);                
         
         ledWriteAll(counter);
 
