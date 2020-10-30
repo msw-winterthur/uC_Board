@@ -26,6 +26,7 @@ int main(void)
     
     //Board initialisieren
     initBoard();
+    
     //Matrix starten und startanimation zeigen
     matrixStart();
     
@@ -41,7 +42,7 @@ int main(void)
     lcdWriteText(2,0,"M1/2:         C:    ");
     lcdWriteText(3,0,"Jx/y:         T:    ");
     //LCD-Beleuchtung einschalten
-    lcdLight(10);
+    lcdLight(255);
     
     while(1)
     {
@@ -56,11 +57,11 @@ int main(void)
         temperatur  = adcRead(ADC_13_TEMPERATUR);               // Temperatur
         joyStickX   = adcRead(ADC_10_JOYSTICK_X);               // Joystick x-Achse
         JoyStickY   = adcRead(ADC_11_JOYSTICK_Y);               // Joystick y-Achse
-        tasteS1     = buttonReadPortL(0);                       // Tasten 1-4
-        tasteS2     = buttonReadPortL(1);
-        tasteS3     = buttonReadPortL(6);
-        tasteS4     = buttonReadPortL(7);
-        schalter    = switchReadAll();                          //Schalter
+        tasteS1     = buttonReadPL() & 0b00000001;              // Tasten 1-4
+        tasteS2     = buttonReadPL() & 0b00000010;
+        tasteS3     = buttonReadPL() & 0b01000000;
+        tasteS4     = buttonReadPL() & 0b10000000;
+        schalter    = switchRead();                             //Schalter
         zeit        = getSystemTimeMs();                        //Systemzeit
         //Verarbeitung--------------------------------------------------------------------
         
@@ -87,8 +88,8 @@ int main(void)
         }
         
         //Ausgabe------------------------------------------------------------------
-        lcdWriteZahl(1, 9,poti1,4,0);                           // Potentiometer 1
-        lcdWriteZahl(1, 5,poti2,4,0);                           // Potentiometer 2
+        lcdWriteZahl(1, 5,poti1,4,0);                           // Potentiometer 1
+        lcdWriteZahl(1, 9,poti2,4,0);                           // Potentiometer 2
         lcdWriteZahl(1,16,licht,4,0);                           // Lichtsensor
         
         lcdWriteZahl(2, 5,magnet1,4,0);                         // Magnet 1
@@ -109,9 +110,9 @@ int main(void)
             lcdWriteZahl(0,0,zeit,9,3);
         }
         
-        rgbPwm(rot,gruen,blau);                
+        rgbWrite(rot,gruen,blau);                
         
-        ledWriteAll(counter);
+        ledWrite(counter);
 
         //Matrixanimation bei Tastendruck auf joystick
         if(btnJoystick)

@@ -10,6 +10,9 @@
 
 #include "ucBoardDriver.h"
 
+void initAdc(void);
+void initLcd(void);
+void initRgb(void);
 void lcdSid(uint8_t status);
 void lcdSclk(uint8_t status);
 void writeLcdF(uint16_t rs, uint16_t value);
@@ -211,22 +214,8 @@ void pinWriteX4PortF(uint8_t bitNr0_3, uint8_t val0_1)
     }
 }
 
-void ledWrite(uint8_t bitNr0_15, uint8_t val0_1)
-{
-    if (val0_1)
-    {
-        PORTA &= ~(1<<bitNr0_15);
-        PORTB &= ~((1<<bitNr0_15)>>8);
-        
-    }
-    else
-    {
-        PORTA |= (1<<bitNr0_15);
-        PORTB |= (1<<bitNr0_15)>>8;
-    }
-}
 
-void ledWriteAll(uint16_t bitMuster)
+void ledWrite(uint16_t bitMuster)
 {
     PORTA = ~bitMuster;
     PORTB = ~(bitMuster>>8);
@@ -247,19 +236,15 @@ uint8_t pinReadX4PortF(uint8_t bitNr0_3)
     return PINF & (1<<bitNr0_3);
 }
 
-uint8_t switchRead(uint8_t bitNr0_7)
-{
-    return PINC & (1<<bitNr0_7);
-}
 
-uint8_t switchReadAll()
+uint8_t switchRead(void)
 {
     return PINC;
 }
 
-uint8_t buttonReadPortL(uint8_t bitNrPortL)
+uint8_t buttonReadPL(void)
 {
-    return PINL & (1<<bitNrPortL);
+    return PINL;
 }
 
 uint8_t buttonReadJoyStickPE2(void)
@@ -431,7 +416,7 @@ void initAdc(void)
     ADCSRA &= 0xEF;                // Interruptflage löschen
 }
 
-uint16_t adcRead(uint8_t kanal)
+uint16_t adcRead(adcChannel_t kanal)
 {
     uint16_t messwert = 0;
     
@@ -476,62 +461,50 @@ void initRgb(void)
     ICR4H = (aufloesung >>8);
     ICR4L = (aufloesung & 0x00FF);
     
-    rgbPwm(0,0,0);
+    rgbWrite(0,0,0);
 }
 
 //--------------------------------------------------------------------------------------------
 // Übergabe von Werten an die PWM Register
 //--------------------------------------------------------------------------------------------
-void rgbPwm(uint16_t Rot,uint16_t Gruen,uint16_t Blau)
+void rgbWrite(uint16_t rot,uint16_t gruen,uint16_t blau)
 {
-    Rot        = 1023 - Rot;
-    Gruen    = 1023 - Gruen;
-    Blau    = 1023 - Blau;
+    rot        = 1023 - rot;
+    gruen    = 1023 - gruen;
+    blau    = 1023 - blau;
     
-    OCR4AH = (Rot >>8);
-    OCR4AL = (Rot & 0x00FF);
+    OCR4AH = (rot >>8);
+    OCR4AL = (rot & 0x00FF);
     
-    OCR4BH = (Gruen >>8);
-    OCR4BL = (Gruen & 0x00FF);
+    OCR4BH = (gruen >>8);
+    OCR4BL = (gruen & 0x00FF);
     
-    OCR4CH = (Blau >>8);
-    OCR4CL = (Blau & 0x00FF);
+    OCR4CH = (blau >>8);
+    OCR4CL = (blau & 0x00FF);
 }
 
-void rgbRot(uint16_t Rot)
+void rgbRot(uint16_t rot)
 {
-    // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Rot)    PORTH |= 0x08;
-    else PORTH &= 0xF7;
-    
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Rot        = 1023 - Rot;
-    OCR4AH = (Rot >>8);
-    OCR4AL = (Rot & 0x00FF);
+    rot        = 1023 - rot;
+    OCR4AH = (rot >>8);
+    OCR4AL = (rot & 0x00FF);
 }
 
-void rgbGruen(uint16_t Gruen)
+void rgbGruen(uint16_t gruen)
 {
-    // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Gruen)    PORTH |= 0x10;
-    else PORTH &= 0xEF;
-    
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Gruen    = 1023 - Gruen;
-    OCR4BH = (Gruen >>8);
-    OCR4BL = (Gruen & 0x00FF);
+    gruen    = 1023 - gruen;
+    OCR4BH = (gruen >>8);
+    OCR4BL = (gruen & 0x00FF);
 }
 
-void rgbBlau(uint16_t Blau)
+void rgbBlau(uint16_t blau)
 {
-    // Wenn PWM nicht initialisiert ist Pin mit LED High oder Low setzen
-    if(Blau)    PORTH |= 0x20;
-    else PORTH &= 0xDF;
-    
     // Wenn PWM initialisirt ist wert an PWM register übergeben
-    Blau    = 1023 - Blau;
-    OCR4CH = (Blau >>8);
-    OCR4CL = (Blau & 0x00FF);
+    blau    = 1023 - blau;
+    OCR4CH = (blau >>8);
+    OCR4CL = (blau & 0x00FF);
 }
 
 //****************************************************************** LCD-Treiber ******************************************************************//
@@ -564,8 +537,7 @@ void lcdLight(uint8_t hellighkeit) // Werte von 0 bis 10 möglich -> 0 = Aus , 1
     else
     {
         TCCR0A |= 0b00100000;
-        if(hellighkeit >10)hellighkeit = 10;
-        OCR0B = (hellighkeit*8);// + 178;
+        OCR0B = hellighkeit;
     }
 }
 
@@ -668,35 +640,35 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 // Text an xy-Position ausgeben
 //------------------------------------------------------------
-void lcdWriteText(uint8_t y_pos, uint8_t x_pos, char *str_ptr)
+void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text)
 {
     uint8_t str_p = 0;
     uint8_t pos;
-    pos = x_pos + (y_pos * 0x20);
+    pos = spalte0_19 + (zeile0_3 * 0x20);
     writeLcdF('C',pos | 0x80);
 
-    while(str_ptr[str_p])
-    { writeLcdF('D',str_ptr[str_p++]);
+    while(text[str_p])
+    { writeLcdF('D',text[str_p++]);
     }
 }
 
 //------------------------------------------------------------
 // Zahl an xy-Position ausgeben dezimal
 //------------------------------------------------------------
-void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, uint8_t s_nk)
+void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t vorKommaStellen, uint8_t nachKommaStellen)
 {
     uint8_t komma=0;
     char numberBuffer[20];//20stellen dezimal
     char send_buffer[22];//64Bit: 20Stellen dezimal + Komma + Zerotermination
     uint8_t i, posSend, posRead, stellenTotal;
-    uint64_t val=zahl_v;
+    uint64_t val=zahl;
     
-    stellenTotal=s_vk+s_nk;
+    stellenTotal=vorKommaStellen+nachKommaStellen;
     if(stellenTotal>20){
-        lcdWriteText(x_pos, y_pos, "--------------------");
+        lcdWriteText(zeile0_3, spalte0_19, "--------------------");
         return;
     }
-    if (s_nk)
+    if (nachKommaStellen)
     {
         komma=1;
     }
@@ -713,7 +685,7 @@ void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, u
     //Vorkommastellen kopieren
     posSend=0;
     posRead=20-stellenTotal;
-    for (i=0;i<s_vk;i++)
+    for (i=0;i<vorKommaStellen;i++)
     {
         send_buffer[posSend] = numberBuffer[posRead];
         posSend++;
@@ -725,7 +697,7 @@ void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, u
         posSend++;
     }
     //Nachkommastellen kopieren
-    for(i=0;i<s_nk;i++){
+    for(i=0;i<nachKommaStellen;i++){
         send_buffer[posSend] = numberBuffer[posRead];
         posSend++;
         posRead++;
@@ -734,13 +706,10 @@ void lcdWriteZahl(uint8_t x_pos, uint8_t y_pos, uint64_t zahl_v, uint8_t s_vk, u
     send_buffer[posSend]=0;
     // Vorangehende Nullen löschen
     i = 0;
-    while ( (send_buffer[i] == 48) && (i < s_vk-1) )
+    while ( (send_buffer[i] == 48) && (i < vorKommaStellen-1) )
     { send_buffer[i++] = 32;
     }
-    
-    
-
-    lcdWriteText(x_pos, y_pos, send_buffer);
+    lcdWriteText(zeile0_3, spalte0_19, send_buffer);
 }
 
 //------------------------------------------------------------
@@ -848,11 +817,6 @@ void matrixStart(void)
     matrixRunning = 1;
 }
 
-void initMatrix(void)
-{
-    matrixStart();
-}
-
 void matrixStop(void)
 {
     matrixRunning = 0;
@@ -879,7 +843,7 @@ void matrixFill(uint8_t wert)
 // Output:        Pixelinformationen dieses Zeichens stehen in der Matrix und werden vom Hintergrundtreiber
 //                fortlaufend herausgeschrieben.
 //-------------------------------------------------------------------------------------------------------------
-void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
+void matrixWriteZeichen(uint16_t spalte, uint16_t zeichenNr)
 {
     uint8_t i, breite;
     if (!matrixRunning)
@@ -888,10 +852,10 @@ void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
     }
     writeTextFinished = 0;
     while(writeTextFinished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
-    breite = ASCII_Tab[Zeichen_Nr][0];                          // Breite eines Zeichens aus Tabelle lesen
+    breite = ASCII_Tab[zeichenNr][0];                          // Breite eines Zeichens aus Tabelle lesen
     for (i=0; i<breite; i++)                                    // Je nach Zeichenbreite alle Spalten kopieren
-    { if(Matrix_Spalten_Nr+i < Anzahl_Spalten)              // Nicht über die Matrix hinaus schreiben !!!
-        { matrix[Matrix_Spalten_Nr+i]= ASCII_Tab[Zeichen_Nr][i+1];
+    { if(spalte+i < Anzahl_Spalten)              // Nicht über die Matrix hinaus schreiben !!!
+        { matrix[spalte+i]= ASCII_Tab[zeichenNr][i+1];
         }
     }
 }
@@ -911,7 +875,7 @@ void matrixWriteZeichen(uint16_t Matrix_Spalten_Nr, uint16_t Zeichen_Nr)
 //                logic             : 1 =  (Bitmuster der Ziffern)  OR (altem Wert in der Matrix) --> Pixel setzen
 //                logic             : 0 = !(Bitmuster der Ziffern) AND (altem Wert in der Matrix) --> Pixel löschen
 //-------------------------------------------------------------------------------------------------------------
-void matrixWriteText(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
+void matrixWriteText(int16_t spalte, char *text, uint16_t logic)
 { int16_t matrix_buffer_pos;
     uint8_t breite, i, z_nr;
     uint8_t str_p = 0;                                      // Dieser Zeiger zeigt auf das zu schreibende Zeichen im Text
@@ -921,11 +885,11 @@ void matrixWriteText(int16_t Matrix_Spalten_Nr, char *str_ptr, uint16_t logic)
     }
     writeTextFinished = 0;
     while(writeTextFinished == 0);                          // Warten, bis alle 8 Zeilen geschrieben wurden.
-    matrix_buffer_pos = Matrix_Spalten_Nr;
-    while (str_ptr[str_p] != 0)
+    matrix_buffer_pos = spalte;
+    while (text[str_p] != 0)
     {
-        breite = ASCII_Tab[str_ptr[str_p]-32][0];               // Breite eines Zeichens aus Tabelle lesen
-        z_nr = str_ptr[str_p]-32;                               // Zeichen-Nr aus Text lesen
+        breite = ASCII_Tab[text[str_p]-32][0];               // Breite eines Zeichens aus Tabelle lesen
+        z_nr = text[str_p]-32;                               // Zeichen-Nr aus Text lesen
         for (i=0; i<breite; i++)                                // Je nach Zeichenbreite alle Spalten kopieren
         { if( (matrix_buffer_pos+i >= 0) && (matrix_buffer_pos+i < Anzahl_Spalten) )    // Nicht über die Matrix hinaus schreiben !!!
             { switch(logic)
