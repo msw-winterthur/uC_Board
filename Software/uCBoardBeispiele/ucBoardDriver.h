@@ -262,7 +262,7 @@ typedef enum ioType_t{
  * \param bitNr0_7  Welches Bit an PortD (0...7)
  * \param type      Ein- oder Ausgang (siehe ioType_t)
  */
-void initPinX1PortD(uint8_t bitNr0_7, ioType_t type);
+void pinInitX1PortD(uint8_t bitNr0_7, ioType_t type);
 
 /**
  * \brief Setze ein Bit an X4, PortL als Ein- oder Ausgang
@@ -270,7 +270,7 @@ void initPinX1PortD(uint8_t bitNr0_7, ioType_t type);
  * \param bitNr2_5  Welches Bit an PortL (2...5)
  * \param type      Ein- oder Ausgang (siehe ioType_t)
  */
-void initPinX4PortL(uint8_t bitNr2_5, ioType_t type);
+void pinInitX4PortL(uint8_t bitNr2_5, ioType_t type);
 
 /**
  * \brief Setze ein Bit an X4, PortF als Ein- oder Ausgang
@@ -278,7 +278,7 @@ void initPinX4PortL(uint8_t bitNr2_5, ioType_t type);
  * \param bitNr0_3  Welches Bit an PortF (0...3)
  * \param type      Ein- oder Ausgang (siehe ioType_t)
  */
-void initPinX4PortF(uint8_t bitNr0_3, ioType_t type);
+void pinInitX4PortF(uint8_t bitNr0_3, ioType_t type);
 
 /**
  * \brief Setzt oder löscht das entsprechende Bit. Bit mit initX... auf Ausgang setzen

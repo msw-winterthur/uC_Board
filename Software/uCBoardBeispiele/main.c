@@ -23,6 +23,7 @@ int main(void)
     uint16_t rot=0;
     uint16_t gruen=0;
     uint16_t blau=0;
+    uint8_t inputX1PortD1 = 0;
     
     //Board initialisieren
     initBoard();
@@ -44,10 +45,16 @@ int main(void)
     //LCD-Beleuchtung einschalten
     lcdLight(255);
     
+    //Pin PD0 an X1 auf Ausgang setzen
+    pinInitX1PortD(0, OUTPUT);
+    //Pin PD1 an X1 auf Eingang mit internem PullUp setzen
+    pinInitX1PortD(1, INPUT_PULLUP);
     while(1)
     {
         //Eingabe-------------------------------------------------------------------------
         btnJoystick = buttonReadJoyStickPE2();
+        
+        inputX1PortD1 = pinReadX1PortD(1);
 
         poti1       = adcRead(ADC_08_POTI_1);                   // Potentiometer 1
         poti2       = adcRead(ADC_09_POTI_2);                   // Potentiometer 2
@@ -113,6 +120,8 @@ int main(void)
         rgbWrite(rot,gruen,blau);                
         
         ledWrite(counter);
+        
+        pinWriteX1PortD(0,inputX1PortD1);
 
         //Matrixanimation bei Tastendruck auf joystick
         if(btnJoystick)

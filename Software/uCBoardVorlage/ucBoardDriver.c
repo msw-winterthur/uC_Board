@@ -81,7 +81,7 @@ void initBoard(void)
     initRgb();
 }
 
-void initPinX1PortD(uint8_t bitNr0_7, ioType_t type)
+void pinInitX1PortD(uint8_t bitNr0_7, ioType_t type)
 {
     switch (type)
     {
@@ -105,7 +105,7 @@ void initPinX1PortD(uint8_t bitNr0_7, ioType_t type)
     }
 }
 
-void initPinX4PortL(uint8_t bitNr2_5, ioType_t type)
+void pinInitX4PortL(uint8_t bitNr2_5, ioType_t type)
 {
     //Andere bits für taster...
     if ((bitNr2_5<2) || (bitNr2_5>5))
@@ -134,7 +134,7 @@ void initPinX4PortL(uint8_t bitNr2_5, ioType_t type)
     }
 }
 
-void initPinX4PortF(uint8_t bitNr0_3, ioType_t type)
+void pinInitX4PortF(uint8_t bitNr0_3, ioType_t type)
 {
     if (bitNr0_3 > 3)
     {
@@ -143,6 +143,7 @@ void initPinX4PortF(uint8_t bitNr0_3, ioType_t type)
     switch (type)
     {
         case OUTPUT:
+        DIDR0  &= ~(1<<bitNr0_3);    // Digitale In Reg an ADC pins aktivieren
         DDRF |= (1<<bitNr0_3);//Output
         break;
         
