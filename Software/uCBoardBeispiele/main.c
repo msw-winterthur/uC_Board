@@ -1,11 +1,36 @@
-/*
-* uCBoardBeispiele.c
+/*********************************************************************************\
 *
-* Created: 26.10.2020 08:43:59
-* Author : Dario Dündar
-*/
+* MMMMMMMMMMMMMMMMMM   SSSSSSSSSSSSSSSSSS   WWWW   WWWW   WWWW
+* MMMMMMMMMMMMMMMMMM   SSSSSSSSSSSSSSSSSS   WWWW   WWWW   WWWW   MECHATRONIK
+* MMMMMMMMMMMMMMMMMM   SSSSS                WWWW   WWWW   WWWW
+* MMMM   MMMM   MMMM   SSSSSSSSSSSSSSSSSS   WWWW   WWWW   WWWW   SCHULE
+* MMMM   MMMM   MMMM   SSSSSSSSSSSSSSSSSS   WWWW   WWWW   WWWW
+* MMMM   MMMM   MMMM                SSSSS   WWWWWWWWWWWWWWWWWW   WINTERTHUR
+* MMMM   MMMM   MMMM   SSSSSSSSSSSSSSSSSS   WWWWWWWWWWWWWWWWWW
+* MMMM   MMMM   MMMM   SSSSSSSSSSSSSSSSSS   WWWWWWWWWWWWWWWWWW   www.msw.ch
+*
+*
+* Dateiname: main.c
+*
+* Projekt  : uC-Board Beispiele
+* Hardware : uC-Board, ATmega2560v von Atmel
+*
+* Copyright: MSW, E2
+*
+* Beschreibung:
+* =============
+* Alle Hardware des uC-Board wird eingesetzt und angezeigt.
+*
+* Portbelegung:
+* =============
+* Siehe ucBoardDriver.h
+*
+* Verlauf:
+* ========
+* siehe https://github.com/msw-winterthur/uC_Board
+*
+\*********************************************************************************/
 
-#include <avr/io.h>
 #include "ucBoardDriver.h"
 
 
