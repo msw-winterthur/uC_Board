@@ -61,6 +61,12 @@ void wait5msTick(uint16_t faktor);
  */
 void ledWrite(uint16_t bitMuster);
 
+/**
+ * \brief Gibt zurück, was im Moment an den LEDs angezeigt wird  (PortA0 LSB bis PortB7 MSB)
+ *
+ * \return uint16_t Bitmuster, das an den LEDs angezeigt wird
+ */
+uint16_t ledRead(void);
 
 /*************************************************************************************************/
 /* Schalter und Buttons                                                                          */

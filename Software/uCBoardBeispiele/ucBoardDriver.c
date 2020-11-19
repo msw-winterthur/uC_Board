@@ -222,6 +222,11 @@ void ledWrite(uint16_t bitMuster)
     PORTB = ~(bitMuster>>8);
 }
 
+uint16_t ledRead(void)
+{
+    return ~(PORTA | (PORTB<<8));
+}
+
 uint8_t pinReadX1PortD(uint8_t bitNr0_7)
 {
     return PIND & (1<<bitNr0_7);
