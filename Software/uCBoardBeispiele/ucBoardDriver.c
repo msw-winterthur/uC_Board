@@ -25,9 +25,8 @@ void matrixWriteNextLine(void);
 void startSystemTimeMs(void);
 uint8_t switchReadAll(void);
 
-volatile uint16_t takt_5ms_zaehler;
 static uint8_t matrixRunning = 0;
-static uint64_t systemTimeMs = 0;
+volatile uint64_t systemTimeMs = 0;
 
 //--------------------------------------------------------------------------------------------
 // Initialisirung Board
@@ -337,27 +336,26 @@ void startSystemTimeMs(void)
 ISR(TIMER0_OVF_vect)
 {
     systemTimeMs += 1;
-    if (!(systemTimeMs%5))
-    {
-        takt_5ms_zaehler --;
-    }
+
     if(matrixRunning)matrixWriteNextLine();
 }
 
-//--------------------------------------------------------------------------------------------
-// 5ms Wartefunktion
-//--------------------------------------------------------------------------------------------
+
 
 uint64_t getSystemTimeMs(void)
 {
     return systemTimeMs;
 }
 
-void wait5msTick(uint16_t faktor)
-{
-    takt_5ms_zaehler = faktor;
-    if(faktor != 0) while(takt_5ms_zaehler);
+uint8_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS){
+    if (systemTimeToWaitForMS < systemTimeMs)
+    {
+        return 0;
+    }
+    while(systemTimeToWaitForMS > systemTimeMs);
+    return 1;
 }
+
 
 
 //****************************************************************** RS232 / USB -Treiber ******************************************************************//
