@@ -40,14 +40,15 @@ void initBoard (void);
  */
 uint64_t getSystemTimeMs(void);
 
+
 /**
- * \brief   Eignet sich um getaktete Programme zu erstellen. Mit Hilfe von Timer 0 wird alle 5ms 
-            ein Flag gesetzt, diese Funktion wartet bis dieses Flag gesetzt wird.
+ * \brief Wartet auf eine bestimte Systemzeit, eignet sich um getaktete Programme zu schreiben.
  * 
- * \param faktor    Wie häufig soll auf das Flag gewartet werden? Für 20ms Programmtakt:
-                    faktor = 4 (5ms*faktor=20ms)
+ * \param systemTimeToWaitForMS Auf diese Systemzeit wird gewartet.
+ * 
+ * \return uint8_t Ist gleich 0 falls die abzuwartende Zeit bereits vorbei ist.
  */
-void wait5msTick(uint16_t faktor);
+uint8_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS);
 
 
 /*************************************************************************************************/
