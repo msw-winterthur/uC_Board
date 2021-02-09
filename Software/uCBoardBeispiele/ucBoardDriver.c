@@ -215,16 +215,36 @@ void pinWriteX4PortF(uint8_t bitNr0_3, uint8_t val0_1)
     }
 }
 
+void ledWrite(uint8_t ledNr0_15, uint8_t wer0_1)
+{
+    uint16_t mask;
+    if (wer0_1)
+    {
+        mask = ~(1 << ledNr0_15);
+        PORTA = PORTA & mask;
+        PORTB = PORTB & (mask >> 8);
+    } 
+    else
+    {
+        mask = (1 << ledNr0_15);
+        PORTA = PORTA | mask;
+        PORTB = PORTB | (mask >> 8);
+    }
+}
 
-void ledWrite(uint16_t bitMuster)
+void ledWriteAll(uint16_t bitMuster)
 {
     PORTA = ~bitMuster;
     PORTB = ~(bitMuster>>8);
 }
 
-uint16_t ledRead(void)
+uint16_t ledReadAll(void)
 {
     return ~(PORTA | (PORTB<<8));
+}
+
+uint8_t ledRead(uint8_t ledNr0_15){
+    return (~(PORTA | (PORTB<<8))) & (1<<ledNr0_15);
 }
 
 uint8_t pinReadX1PortD(uint8_t bitNr0_7)
@@ -242,15 +262,24 @@ uint8_t pinReadX4PortF(uint8_t bitNr0_3)
     return PINF & (1<<bitNr0_3);
 }
 
+uint8_t switchRead(uint8_t switchNr0_7)
+{
+    return PINC & (1<<switchNr0_7);
+}    
 
-uint8_t switchRead(void)
+uint8_t switchReadAll(void)
 {
     return PINC;
 }
 
-uint8_t buttonReadPL(void)
+uint8_t buttonReadAllPL(void)
 {
     return PINL;
+}
+
+uint8_t buttonReadPL(uint8_t buttonNr0_7)
+{
+    return PINL & (1<<buttonNr0_7);
 }
 
 uint8_t buttonReadJoyStickPE2(void)

@@ -59,14 +59,31 @@ void wait5msTick(uint16_t faktor);
  * 
  * \param bitMuster     Das Bitmuster, das angezeigt werden soll
  */
-void ledWrite(uint16_t bitMuster);
+void ledWriteAll(uint16_t bitMuster);
 
 /**
  * \brief Gibt zurück, was im Moment an den LEDs angezeigt wird  (PortA0 LSB bis PortB7 MSB)
  *
  * \return uint16_t Bitmuster, das an den LEDs angezeigt wird
  */
-uint16_t ledRead(void);
+uint16_t ledReadALL(void);
+
+/**
+ * \brief Setzt eine einzelne LED
+ * 
+ * \param ledNr0_15 Welche LED soll gesetzt werden? LED 0 = PORTA Bit 0 und LED 15 = PORTB Bit 7
+ * \param wer0_1 Auf welchen Wert soll die LED gesetzt werden? 1 = LED leuhtet
+ */
+void ledWrite(uint8_t ledNr0_15, uint8_t wer0_1);
+
+/**
+ * \brief Liest den Zustand einer enzelnen LED ein
+ * 
+ * \param ledNr0_15 Welche LED soll eingelesen werden?
+ * 
+ * \return uint8_t Wahr wenn die entsprechende LED leuchtet
+ */
+uint8_t ledRead(uint8_t ledNr0_15);
 
 /*************************************************************************************************/
 /* Schalter und Buttons                                                                          */
@@ -77,14 +94,33 @@ uint16_t ledRead(void);
  *
  * \return uint8_t Eingestellter Schalterwert
  */
-uint8_t switchRead(void);
+uint8_t switchReadAll(void);
+
+/**
+ * \brief Liest einen einzelnen Schalter ein.
+ * 
+ * \param switchNr0_7 Welcher Schalter soll eingelesen werden?
+ *                    Schalter 0 = PORTC Bit 0 / Schalter 7 = PORTC Bit 7
+ * 
+ * \return uint8_t Wahr wenn der Schalter ein ist, falsch wenn der Schalter aus ist.
+ */
+uint8_t switchRead(uint8_t switchNr0_7);
 
 /**
  * \brief Liest die Buttons an PortL ein (S1=PL0, S2=PL1, S3=PL6, S4=PL7)
  * 
  * \return uint8_t Den gesamten PortL, ACHTUNG Bit 3-5 sind auf Anschluss X4
  */
-uint8_t buttonReadPL(void);
+uint8_t buttonReadAllPL(void);
+
+/**
+ * \brief Liest einen Button an PortL ein (S1=PL0, S2=PL1, S3=PL6, S4=PL7)
+ * 
+ * \param buttonNr0_7 0=S1, 1=S2, 6=S3, 7=S4
+ * 
+ * \return uint8_t Wahr wenn der entsprechende Button gedrückt ist
+ */
+uint8_t buttonReadPL(uint8_t buttonNr0_7);
 
 /**
  * \brief Lese den JoyStick-Button ein (PortE Bit 2)

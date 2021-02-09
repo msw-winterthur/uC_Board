@@ -89,11 +89,11 @@ int main(void)
         temperatur  = adcRead(ADC_13_TEMPERATUR);               // Temperatur
         joyStickX   = adcRead(ADC_10_JOYSTICK_X);               // Joystick x-Achse
         JoyStickY   = adcRead(ADC_11_JOYSTICK_Y);               // Joystick y-Achse
-        tasteS1     = buttonReadPL() & 0b00000001;              // Tasten 1-4
-        tasteS2     = buttonReadPL() & 0b00000010;
-        tasteS3     = buttonReadPL() & 0b01000000;
-        tasteS4     = buttonReadPL() & 0b10000000;
-        schalter    = switchRead();                             //Schalter
+        tasteS1     = buttonReadAllPL() & 0b00000001;              // Tasten 1-4
+        tasteS2     = buttonReadPL(1);
+        tasteS3     = buttonReadPL(6);
+        tasteS4     = buttonReadPL(7);
+        schalter    = switchReadAll();                             //Schalter
         zeit        = getSystemTimeMs();                        //Systemzeit
         //Verarbeitung--------------------------------------------------------------------
         
@@ -144,7 +144,7 @@ int main(void)
         
         rgbWrite(rot,gruen,blau);                
         
-        ledWrite(counter);
+        ledWriteAll(counter);
         
         pinWriteX1PortD(0,inputX1PortD1);
 
