@@ -10,6 +10,11 @@
 
 #include "ucBoardDriver.h"
 
+#ifndef SWITCH_ACTIV_HIGH
+    #define SWITCH_ACTIV_HIGH   1
+#endif
+
+
 void initAdc(void);
 void initLcd(void);
 void initRgb(void);
@@ -18,6 +23,7 @@ void lcdSclk(uint8_t status);
 void writeLcdF(uint16_t rs, uint16_t value);
 void matrixWriteNextLine(void);
 void startSystemTimeMs(void);
+uint8_t switchReadAll(void);
 
 volatile uint16_t takt_5ms_zaehler;
 static uint8_t matrixRunning = 0;
@@ -264,12 +270,16 @@ uint8_t pinReadX4PortF(uint8_t bitNr0_3)
 
 uint8_t switchRead(uint8_t switchNr0_7)
 {
-    return PINC & (1<<switchNr0_7);
+    return switchReadAll() & (1<<switchNr0_7);
 }    
 
 uint8_t switchReadAll(void)
 {
-    return PINC;
+    if (SWITCH_ACTIV_HIGH)
+    {
+        return PINC;
+    }
+    return ~PINC;
 }
 
 uint8_t buttonReadAllPL(void)
