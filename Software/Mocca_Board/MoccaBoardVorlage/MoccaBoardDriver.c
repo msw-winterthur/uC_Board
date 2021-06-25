@@ -524,8 +524,13 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 // Text an xy-Position ausgeben
 //------------------------------------------------------------
-void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text)
+void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...)
 {
+    #define MAX_STRING_SIZE 21
+    char text[MAX_STRING_SIZE];
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(text, MAX_STRING_SIZE, formattedText, arglist);
     uint8_t str_p = 0;
     uint8_t pos;
     pos = spalte0_19 + (zeile0_3 * 0x20);
@@ -595,6 +600,93 @@ void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t v
     }
     lcdWriteText(zeile0_3, spalte0_19, send_buffer);
 }
+
+void lcdLog(char const *formattedText, ...)
+{
+    #define ANZAHL_ZEILEN 4
+    #define ANZAHL_SPALTEN 16
+
+    static char lcdPrintText[ANZAHL_ZEILEN][ANZAHL_SPALTEN];
+    char newText[ANZAHL_SPALTEN];
+    static uint16_t lcdPrintNr[ANZAHL_ZEILEN];
+    static uint8_t firstCall=1;
+    static uint16_t nummer;
+    
+    if (firstCall)
+    {
+        lcdClear();
+        firstCall=0;
+        nummer = 0;
+        //Array komplett auf 0 setzen
+        for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
+        {
+            lcdPrintNr[i]=0;
+            for (uint8_t j=0; j<ANZAHL_SPALTEN; j++)
+            {
+                lcdPrintText[i][j] = ' ';
+                if (j==ANZAHL_SPALTEN-1)
+                {
+                    lcdPrintText[i][j] = 0;
+                }
+            }
+        }
+    }
+    nummer++;
+    
+    //prepare new text
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    //mit Leerzeichen auffüllen
+    uint8_t finish=0;
+    for (uint8_t i=0;i<ANZAHL_SPALTEN;i++)
+    {
+        if (newText[i] == 0)
+        {
+            finish=1;
+        }
+        if (finish)
+        {
+            newText[i]=' ';
+        }
+    }
+    newText[ANZAHL_SPALTEN-1]=0;
+    //compare new against line 0
+    uint8_t textUpdate=strcmp(newText,lcdPrintText[0]);
+    
+    if (textUpdate)
+    {
+        //array text 1 zeile nach oben schieben
+        for (uint8_t i=ANZAHL_ZEILEN-1; i>0; i--)
+        {
+            lcdPrintNr[i]=lcdPrintNr[i-1];
+            for (uint8_t j=0; j<ANZAHL_SPALTEN; j++)
+            {
+                lcdPrintText[i][j] = lcdPrintText[i-1][j];
+            }
+        }
+        //neuer text in array
+        for (uint8_t i=0; i<ANZAHL_SPALTEN; i++)
+        {
+            lcdPrintText[0][i] = newText[i];
+        }
+        lcdPrintNr[0]=nummer;
+        //komplettes array ausgeben
+        for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
+        {
+            uint8_t j = 3-i;
+            lcdWriteText(i,5,lcdPrintText[j]);
+            lcdWriteText(i,4,":");
+            lcdWriteZahl(i,0,lcdPrintNr[j],4,0);
+        }
+        }else{
+        //if same text, update only number
+        lcdPrintNr[0]=nummer;
+        lcdWriteZahl(ANZAHL_ZEILEN-1,0,lcdPrintNr[0],4,0);
+    }
+}
+
+
 
 //------------------------------------------------------------
 // Clear LCD

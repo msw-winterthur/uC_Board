@@ -13,6 +13,10 @@
 #include <avr/interrupt.h>
 #define F_CPU 16000000UL
 #include <util/delay.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 /*************************************************************************************************/
@@ -196,13 +200,14 @@ void rgbBlau(uint16_t blau);
 void lcdLight(uint8_t helligkeit);
 
 /**
- * \brief Schreibt einen Text auf das LCD
+ * \brief   Schreibt einen Text auf das LCD. Der Text darf formatiert sein:
+ *          https://de.wikipedia.org/wiki/Printf
  * 
  * \param zeile0_3      Auf welcher Zeile von 0...3 soll geschrieben werden?
  * \param spalte0_19    Ab welcher Spalte von 0...19 soll geschirebene werden?
- * \param text          Der Text, z.B: "Hallo"
+ * \param formattedText Formatierter Text, z.B: "Hallo %d", 5
  */
-void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text);
+void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...);
 
 /**
  * \brief Schreibt eine Zahl mit maximal 20 Stellen auf das Display
@@ -216,6 +221,20 @@ void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text);
  */
 void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
                     uint8_t vorKommaStellen, uint8_t nachKommaStellen);
+
+
+/**
+ * \brief   Ein Log wird auf das LCD geschrieben. Der Log erhält automatisch eine Zeilennummer.
+ *          Falls mehrmals die selbe Nachricht hintereinander gelogt wird, wird nur die
+ *          Zeilennummer aktualisiert. Die Idee ist, dass das Display nur für den Log und für
+ *          nichts anderes verwendet wird. Der Text darf formatiert sein:
+ *          https://de.wikipedia.org/wiki/Printf
+ * 
+ * \param formatedText  Formatierter Text, z.B: "Hallo %d", 5
+ * 
+ * \return void
+ */
+void lcdLog(char const *formatedText, ...);
 
 /**
  * \brief Löscht alles auf dem LCD
