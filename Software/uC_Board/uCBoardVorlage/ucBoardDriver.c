@@ -756,17 +756,16 @@ void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t v
 }
 
 
-void print(char *text)
+void lcdLog(char const *format, ...)
 {
     #define ANZAHL_ZEILEN 4
     #define ANZAHL_SPALTEN 16
-    
+
     static char lcdPrintText[ANZAHL_ZEILEN][ANZAHL_SPALTEN];
     char newText[ANZAHL_SPALTEN];
     static uint16_t lcdPrintNr[ANZAHL_ZEILEN];
     static uint8_t firstCall=1;
     static uint16_t nummer;
-    
     
     if (firstCall)
     {
@@ -790,34 +789,25 @@ void print(char *text)
     nummer++;
     
     //prepare new text
-    uint8_t textFinish=0;
-    for (uint8_t i=0; i<ANZAHL_SPALTEN; i++)
+    va_list arglist;
+    va_start(arglist, format);
+    vsnprintf(newText, ANZAHL_SPALTEN, format, arglist);
+    //mit Leerzeichen auffüllen
+    uint8_t finish=0;
+    for (uint8_t i=0;i<ANZAHL_SPALTEN;i++)
     {
-        if (text[i] && !textFinish)
+        if (newText[i] == 0)
         {
-            newText[i] = text[i];
+            finish=1;
         }
-        else
+        if (finish)
         {
-            textFinish=1;
-            newText[i] = ' ';
-        }
-        if (i==ANZAHL_SPALTEN-1)
-        {
-            newText[i] = 0;
+            newText[i]=' ';
         }
     }
-    
+    newText[ANZAHL_SPALTEN-1]=0;
     //compare new against line 0
-    uint8_t textUpdate=0;
-    for (uint8_t i=0; i<ANZAHL_SPALTEN; i++)
-    {
-        if (lcdPrintText[0][i] != newText[i])
-        {
-            textUpdate = 1;
-            break;
-        }
-    }
+    uint8_t textUpdate=strcmp(newText,lcdPrintText[0]);
     
     if (textUpdate)
     {
@@ -832,21 +822,22 @@ void print(char *text)
         }
         //neuer text in array
         for (uint8_t i=0; i<ANZAHL_SPALTEN; i++)
-        {
+        {  
             lcdPrintText[0][i] = newText[i];
         }
-    }
-    
-    
-    lcdPrintNr[0]=nummer;
-    //komplettes array ausgeben
-    
-    for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
-    {
-        uint8_t j = 3-i;
-        lcdWriteText(i,5,lcdPrintText[j]);
-        lcdWriteText(i,4,":");
-        lcdWriteZahl(i,0,lcdPrintNr[j],4,0);
+        lcdPrintNr[0]=nummer;
+        //komplettes array ausgeben
+        for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
+        {
+            uint8_t j = 3-i;
+            lcdWriteText(i,5,lcdPrintText[j]);
+            lcdWriteText(i,4,":");
+            lcdWriteZahl(i,0,lcdPrintNr[j],4,0);
+        }
+    }else{
+        //if same text, update only number
+        lcdPrintNr[0]=nummer;
+        lcdWriteZahl(ANZAHL_ZEILEN-1,0,lcdPrintNr[0],4,0);
     }
 }
 

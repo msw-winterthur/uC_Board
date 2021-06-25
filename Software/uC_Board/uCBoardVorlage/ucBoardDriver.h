@@ -13,6 +13,11 @@
 #include <avr/interrupt.h>
 #define F_CPU 16000000UL
 #include <util/delay.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 
 /*************************************************************************************************/
@@ -239,7 +244,7 @@ void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
                     uint8_t vorKommaStellen, uint8_t nachKommaStellen);
 
 
-void print(char *text);
+void lcdLog(char const *format, ...);
 
 /**
  * \brief Löscht alles auf dem LCD
