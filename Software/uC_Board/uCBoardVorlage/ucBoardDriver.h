@@ -238,6 +238,9 @@ void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text);
 void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
                     uint8_t vorKommaStellen, uint8_t nachKommaStellen);
 
+
+void print(char *text);
+
 /**
  * \brief Löscht alles auf dem LCD
  */
