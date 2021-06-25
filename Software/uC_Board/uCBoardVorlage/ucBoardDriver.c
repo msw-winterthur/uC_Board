@@ -683,8 +683,13 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 // Text an xy-Position ausgeben
 //------------------------------------------------------------
-void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char *text)
+void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...)
 {
+    #define MAX_STRING_SIZE 21
+    char text[MAX_STRING_SIZE];
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(text, MAX_STRING_SIZE, formattedText, arglist);
     uint8_t str_p = 0;
     uint8_t pos;
     pos = spalte0_19 + (zeile0_3 * 0x20);
@@ -756,7 +761,7 @@ void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t v
 }
 
 
-void lcdLog(char const *format, ...)
+void lcdLog(char const *formattedText, ...)
 {
     #define ANZAHL_ZEILEN 4
     #define ANZAHL_SPALTEN 16
@@ -790,8 +795,8 @@ void lcdLog(char const *format, ...)
     
     //prepare new text
     va_list arglist;
-    va_start(arglist, format);
-    vsnprintf(newText, ANZAHL_SPALTEN, format, arglist);
+    va_start(arglist, formattedText);
+    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
     //mit Leerzeichen auffüllen
     uint8_t finish=0;
     for (uint8_t i=0;i<ANZAHL_SPALTEN;i++)
