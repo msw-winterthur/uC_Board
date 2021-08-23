@@ -27683,7 +27683,7 @@ I/O digital</text>
 <wire x1="184.15" y1="-19.05" x2="184.15" y2="-57.15" width="0.1524" layer="97"/>
 <text x="134.62" y="-54.61" size="1.778" layer="97">Servo</text>
 <text x="325.12" y="269.24" size="1.778" layer="97">I/O- Port digital
-z.B. RGB-Streifen</text>
+UART</text>
 <wire x1="321.31" y1="304.8" x2="378.46" y2="304.8" width="0.1524" layer="97"/>
 <wire x1="378.46" y1="304.8" x2="378.46" y2="266.7" width="0.1524" layer="97"/>
 <wire x1="378.46" y1="266.7" x2="321.31" y2="266.7" width="0.1524" layer="97"/>
