@@ -225,31 +225,31 @@ void ledWrite(uint8_t ledNr0_15, uint8_t wer0_1)
     uint16_t mask;
     if (wer0_1)
     {
-        mask = ~(1 << ledNr0_15);
-        PORTA = PORTA & mask;
-        PORTB = PORTB & (mask >> 8);
-    } 
-    else
-    {
         mask = (1 << ledNr0_15);
         PORTA = PORTA | mask;
         PORTB = PORTB | (mask >> 8);
+    } 
+    else
+    {
+        mask = ~(1 << ledNr0_15);
+        PORTA = PORTA & mask;
+        PORTB = PORTB & (mask >> 8);
     }
 }
 
 void ledWriteAll(uint16_t bitMuster)
 {
-    PORTA = ~bitMuster;
-    PORTB = ~(bitMuster>>8);
+    PORTA = bitMuster;
+    PORTB = (bitMuster>>8);
 }
 
 uint16_t ledReadAll(void)
 {
-    return ~(PORTA | (PORTB<<8));
+    return (PORTA | (PORTB<<8));
 }
 
 uint8_t ledRead(uint8_t ledNr0_15){
-    return (~(PORTA | (PORTB<<8))) & (1<<ledNr0_15);
+    return (PORTA | (PORTB<<8)) & (1<<ledNr0_15);
 }
 
 uint8_t pinReadX1PortD(uint8_t bitNr0_7)

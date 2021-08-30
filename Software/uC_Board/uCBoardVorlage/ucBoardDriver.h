@@ -78,7 +78,7 @@ uint16_t ledReadALL(void);
  * \brief Setzt eine einzelne LED
  * 
  * \param ledNr0_15 Welche LED soll gesetzt werden? LED 0 = PORTA Bit 0 und LED 15 = PORTB Bit 7
- * \param wer0_1 Auf welchen Wert soll die LED gesetzt werden? 1 = LED leuhtet
+ * \param wer0_1 Auf welchen Wert soll die LED gesetzt werden? 1 = LED leuchtet
  */
 void ledWrite(uint8_t ledNr0_15, uint8_t wer0_1);
 
