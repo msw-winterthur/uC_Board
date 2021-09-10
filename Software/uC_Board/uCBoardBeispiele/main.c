@@ -39,7 +39,8 @@ int main(void)
     uint16_t joyStickX, JoyStickY;
     uint16_t tasteS1,tasteS2,tasteS3,tasteS4;
     uint8_t schalter;
-    uint16_t  counter = 0;
+    uint16_t  ledMuster = 0;
+    uint16_t ledInvert = 0x00FF;
     uint8_t btnJoystick;
     uint64_t zeit=0;
     uint16_t rot=0;
@@ -94,8 +95,11 @@ int main(void)
         zeit        = getSystemTimeMs();                        //Systemzeit
         //Verarbeitung--------------------------------------------------------------------
         
-        counter=counter>>1;
-        if(!counter) counter=0x8000;
+        ledMuster=ledMuster>>1;
+        if(!ledMuster){
+            ledInvert = ~ledInvert;
+            ledMuster=0x8000;
+        }            
         
         if (tasteS1)
         {
@@ -141,7 +145,7 @@ int main(void)
         
         rgbWrite(rot,gruen,blau);                
         
-        ledWriteAll(counter);
+        ledWriteAll(ledMuster^ledInvert);
         
         pinWriteX1PortD(0,inputX1PortD1);
 
