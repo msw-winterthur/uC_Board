@@ -41,6 +41,7 @@ int main(void)
     uint8_t schalter;
     uint16_t  ledMuster = 0;
     uint16_t ledInvert = 0x00FF;
+    uint8_t ledDirRight = 1;
     uint8_t btnJoystick;
     uint64_t zeit=0;
     uint16_t rot=0;
@@ -95,11 +96,23 @@ int main(void)
         zeit        = getSystemTimeMs();                        //Systemzeit
         //Verarbeitung--------------------------------------------------------------------
         
-        ledMuster=ledMuster>>1;
-        if(!ledMuster){
-            ledInvert = ~ledInvert;
-            ledMuster=0x8000;
-        }            
+        if (ledDirRight)
+        {
+            ledMuster=ledMuster>>1;
+            if(!ledMuster){
+                ledMuster=0x0001;
+                ledDirRight=0;   
+            }                
+        } 
+        else
+        {
+            ledMuster=ledMuster<<1;
+            if(!ledMuster){
+                ledMuster=0x8000;
+                ledDirRight=1;
+                ledInvert=~ledInvert;
+            }                
+        }      
         
         if (tasteS1)
         {
