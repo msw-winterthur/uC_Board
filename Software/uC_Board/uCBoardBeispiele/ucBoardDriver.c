@@ -37,9 +37,9 @@ void initBoard(void)
     //PullUpDesable auf 0
     MCUCR = MCUCR | (0<<PUD);
     //PORTA&B LED Ports auf Ausgnag und LED off
-    PORTA   = 0xFF;
+    PORTA   = 0x00;
     DDRA    = 0xFF;
-    PORTB   = 0xFF;
+    PORTB   = 0x00;
     DDRB    = 0xFF;
     //PORTC Schalter Port auf Eingnag mit Pullup
     PORTC   = 0xFF;
