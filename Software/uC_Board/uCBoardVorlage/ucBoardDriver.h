@@ -26,12 +26,14 @@
 
 /**
  * \brief Initialisiert das Board.
-   - Die Pins an X1 und X4 werden auf ADC oder Eingang mit PullUp gesetzt.
-   - Alle Hardware auf dem Board wird initialisiert
-   - Timer 0: Systemzeit, 5ms Tick, lcdLight, Matrix
-   - Timer 4: rgbLED
+ * - Die Pins an X1 und X4 werden auf ADC oder Eingang mit PullUp gesetzt.
+ * - Alle Hardware auf dem Board wird initialisiert
+ * - Timer 0: Systemzeit, 5ms Tick, lcdLight, Matrix
+ * - Timer 4: rgbLED
+ *  
+ * \param startAnimation Zeigt eine kleine Startanimation wenn wahr
  */
-void initBoard (void);
+void initBoard(uint8_t startAnimation);
 
 
 /*************************************************************************************************/

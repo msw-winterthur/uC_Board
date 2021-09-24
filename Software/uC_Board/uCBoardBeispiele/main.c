@@ -50,7 +50,7 @@ int main(void)
     uint8_t inputX1PortD1 = 0;
     
     //Board initialisieren
-    initBoard();
+    initBoard(1);
     
     //Matrix starten und startanimation zeigen
     matrixStart();

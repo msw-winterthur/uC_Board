@@ -32,7 +32,7 @@ volatile uint64_t systemTimeMs = 0;
 // Initialisirung Board
 //--------------------------------------------------------------------------------------------
 
-void initBoard(void)
+void initBoard(uint8_t startAnimation)
 {
     //PullUpDesable auf 0
     MCUCR = MCUCR | (0<<PUD);
@@ -84,6 +84,74 @@ void initBoard(void)
     initAdc();
     //init rgb
     initRgb();
+    
+    if (startAnimation)
+    {
+        lcdLight(255);
+        rgbWrite(0,1023,0);
+        lcdWriteText(0,0,"      uC-Board      ");
+        lcdWriteText(1,0,"ATmega2560 at 16 MHz");
+        lcdWriteText(2,0,"--------------------");
+        lcdWriteText(3,0,"Press any key to run");
+        uint8_t i=0;
+        uint8_t goRight=1;
+        uint8_t btnPressed=0;
+        uint8_t light=0;
+        uint8_t goBrighter=1;
+        while (1)
+        {
+            if (goRight)
+            {
+                ledWriteAll(0x8000>>i);
+            } 
+            else
+            {
+                ledWriteAll(0x0001<<i);
+            }
+            i++;
+            if (i>16)
+            {
+                i=0;
+                goRight=!goRight;
+            }
+            
+            if (goBrighter)
+            {
+                light+=2;
+            }
+            else
+            {
+                light-=2;
+            }
+            lcdLight(light);
+            if (light==254)
+            {
+                goBrighter=0;
+            }
+            if (light==120)
+            {
+                goBrighter=1;
+            }
+            
+            if (!btnPressed && (buttonReadAllPL()&0b11000011))
+            {
+                rgbWrite(1023,550,0);
+                lcdWriteText(3,0,"  release all keys  ");
+                btnPressed=1;
+            }
+            if (btnPressed && !(buttonReadAllPL()&0b11000011))
+            {
+                break;
+            }
+            _delay_ms(8);
+        }
+        lcdClear();
+        lcdLight(0);
+        ledWriteAll(0);
+        rgbWrite(0,0,0);
+        systemTimeMs=0;
+    }
+    
 }
 
 void pinInitX1PortD(uint8_t bitNr0_7, ioType_t type)

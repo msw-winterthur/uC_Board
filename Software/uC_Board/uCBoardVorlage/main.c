@@ -40,7 +40,7 @@ int main(void)
     //Variablen
     
     //Initialisieren
-    initBoard();
+    initBoard(1);
     
     //Unendlichschlaufe
     while(1)
