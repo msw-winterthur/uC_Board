@@ -828,12 +828,10 @@ void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t v
     lcdWriteText(zeile0_3, spalte0_19, send_buffer);
 }
 
-
+#define ANZAHL_ZEILEN 4
+#define ANZAHL_SPALTEN 16
 void lcdLog(char const *formattedText, ...)
 {
-    #define ANZAHL_ZEILEN 4
-    #define ANZAHL_SPALTEN 16
-
     static char lcdPrintText[ANZAHL_ZEILEN][ANZAHL_SPALTEN];
     char newText[ANZAHL_SPALTEN];
     static uint16_t lcdPrintNr[ANZAHL_ZEILEN];
@@ -914,7 +912,42 @@ void lcdLog(char const *formattedText, ...)
     }
 }
 
+void lcdLogWaitBtn(uint8_t waitForBtn, char const *formattedText, ...){
+    char newText[ANZAHL_SPALTEN];
+    //prepare new text
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    lcdLog(newText);
+    if (waitForBtn)
+    {
+        uint64_t oldSysTime=getSystemTimeMs();
+        while (!(buttonReadAllPL()&0b11000011))
+        {
+            ;
+        }
+        while(buttonReadAllPL()&0b11000011)
+        {
+            ;
+        }
+        systemTimeMs = oldSysTime;
+    }
+}
 
+void lcdLogWaitMs(uint64_t waitTimeMs, char const *formattedText, ...){
+    char newText[ANZAHL_SPALTEN];
+    //prepare new text
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    lcdLog(newText);
+    if (waitTimeMs)
+    {
+        uint64_t oldSysTime=getSystemTimeMs();
+        waitForSystemTimeMs(oldSysTime+waitTimeMs);
+        systemTimeMs = oldSysTime;
+    }
+}
 
 
 //------------------------------------------------------------

@@ -261,6 +261,35 @@ void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
 void lcdLog(char const *formatedText, ...);
 
 /**
+ * \brief   Ein Log wird auf das LCD geschrieben. Der Log erhält automatisch eine Zeilennummer.
+ *          Falls mehrmals die selbe Nachricht hintereinander gelogt wird, wird nur die
+ *          Zeilennummer aktualisiert. Die Idee ist, dass das Display nur für den Log und für
+ *          nichts anderes verwendet wird. Der Text darf formatiert sein:
+ *          https://de.wikipedia.org/wiki/Printf
+ * 
+ * \param formatedText  Formatierter Text, z.B: "Hallo %d", 5
+ * \param waitForBtn    Pausiert das Programm nach dem Log bis ein Button gedrückt wird
+ * 
+ * \return void
+ */
+void lcdLogWaitBtn(uint8_t waitForBtn, char const *formattedText, ...);
+
+/**
+ * \brief   Ein Log wird auf das LCD geschrieben. Der Log erhält automatisch eine Zeilennummer.
+ *          Falls mehrmals die selbe Nachricht hintereinander gelogt wird, wird nur die
+ *          Zeilennummer aktualisiert. Die Idee ist, dass das Display nur für den Log und für
+ *          nichts anderes verwendet wird. Der Text darf formatiert sein:
+ *          https://de.wikipedia.org/wiki/Printf
+ * 
+ * \param formatedText  Formatierter Text, z.B: "Hallo %d", 5
+ * \param waitTimeMs    Pausiert das Programm nach dem Log für diese Anzahl ms
+ * 
+ * \return void
+ */
+void lcdLogWaitMs(uint64_t waitTimeMs, char const *formattedText, ...);
+
+
+/**
  * \brief Löscht alles auf dem LCD
  */
 void lcdClear(void);
