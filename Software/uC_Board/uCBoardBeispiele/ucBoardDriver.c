@@ -828,13 +828,25 @@ void lcdWriteZahl(uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl, uint8_t v
     lcdWriteText(zeile0_3, spalte0_19, send_buffer);
 }
 
-#define ANZAHL_ZEILEN 4
-#define ANZAHL_SPALTEN 16
+#define ANZAHL_ZEILEN_LOG_MAX 4
+#define ANZAHL_SPALTEN_LOG 16
+volatile uint8_t lcdLogZeilen = 4;
+
+void lcdLogSetLinesToUse(uint8_t linesToUse1_4)
+{
+    linesToUse1_4 = linesToUse1_4 % (ANZAHL_ZEILEN_LOG_MAX + 1);
+    if (linesToUse1_4)
+    {
+        lcdLogZeilen = linesToUse1_4;
+    }
+    
+}
+
 void lcdLog(char const *formattedText, ...)
 {
-    static char lcdPrintText[ANZAHL_ZEILEN][ANZAHL_SPALTEN];
-    char newText[ANZAHL_SPALTEN];
-    static uint16_t lcdPrintNr[ANZAHL_ZEILEN];
+    static char lcdPrintText[ANZAHL_ZEILEN_LOG_MAX][ANZAHL_SPALTEN_LOG];
+    char newText[ANZAHL_SPALTEN_LOG];
+    static uint16_t lcdPrintNr[ANZAHL_ZEILEN_LOG_MAX];
     static uint8_t firstCall=1;
     static uint16_t nummer;
     
@@ -844,13 +856,13 @@ void lcdLog(char const *formattedText, ...)
         firstCall=0;
         nummer = 0;
         //Array komplett auf 0 setzen
-        for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
+        for (uint8_t i=0; i<ANZAHL_ZEILEN_LOG_MAX; i++)
         {
             lcdPrintNr[i]=0;
-            for (uint8_t j=0; j<ANZAHL_SPALTEN; j++)
+            for (uint8_t j=0; j<ANZAHL_SPALTEN_LOG; j++)
             {
                 lcdPrintText[i][j] = ' ';
-                if (j==ANZAHL_SPALTEN-1)
+                if (j==ANZAHL_SPALTEN_LOG-1)
                 {
                     lcdPrintText[i][j] = 0;
                 }
@@ -862,10 +874,10 @@ void lcdLog(char const *formattedText, ...)
     //prepare new text
     va_list arglist;
     va_start(arglist, formattedText);
-    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    vsnprintf(newText, ANZAHL_SPALTEN_LOG, formattedText, arglist);
     //mit Leerzeichen auffüllen
     uint8_t finish=0;
-    for (uint8_t i=0;i<ANZAHL_SPALTEN;i++)
+    for (uint8_t i=0;i<ANZAHL_SPALTEN_LOG;i++)
     {
         if (newText[i] == 0)
         {
@@ -876,29 +888,29 @@ void lcdLog(char const *formattedText, ...)
             newText[i]=' ';
         }
     }
-    newText[ANZAHL_SPALTEN-1]=0;
+    newText[ANZAHL_SPALTEN_LOG-1]=0;
     //compare new against line 0
     uint8_t textUpdate=strcmp(newText,lcdPrintText[0]);
     
     if (textUpdate)
     {
         //array text 1 zeile nach oben schieben
-        for (uint8_t i=ANZAHL_ZEILEN-1; i>0; i--)
+        for (uint8_t i=ANZAHL_ZEILEN_LOG_MAX-1; i>0; i--)
         {
             lcdPrintNr[i]=lcdPrintNr[i-1];
-            for (uint8_t j=0; j<ANZAHL_SPALTEN; j++)
+            for (uint8_t j=0; j<ANZAHL_SPALTEN_LOG; j++)
             {
                 lcdPrintText[i][j] = lcdPrintText[i-1][j];
             }
         }
         //neuer text in array
-        for (uint8_t i=0; i<ANZAHL_SPALTEN; i++)
+        for (uint8_t i=0; i<ANZAHL_SPALTEN_LOG; i++)
         {  
             lcdPrintText[0][i] = newText[i];
         }
         lcdPrintNr[0]=nummer;
         //komplettes array ausgeben
-        for (uint8_t i=0; i<ANZAHL_ZEILEN; i++)
+        for (uint8_t i=ANZAHL_ZEILEN_LOG_MAX-lcdLogZeilen; i<ANZAHL_ZEILEN_LOG_MAX; i++)
         {
             uint8_t j = 3-i;
             lcdWriteText(i,5,lcdPrintText[j]);
@@ -908,16 +920,16 @@ void lcdLog(char const *formattedText, ...)
     }else{
         //if same text, update only number
         lcdPrintNr[0]=nummer;
-        lcdWriteZahl(ANZAHL_ZEILEN-1,0,lcdPrintNr[0],4,0);
+        lcdWriteZahl(ANZAHL_ZEILEN_LOG_MAX-1,0,lcdPrintNr[0],4,0);
     }
 }
 
 void lcdLogWaitBtn(uint8_t waitForBtn, char const *formattedText, ...){
-    char newText[ANZAHL_SPALTEN];
+    char newText[ANZAHL_SPALTEN_LOG];
     //prepare new text
     va_list arglist;
     va_start(arglist, formattedText);
-    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    vsnprintf(newText, ANZAHL_SPALTEN_LOG, formattedText, arglist);
     lcdLog(newText);
     if (waitForBtn)
     {
@@ -935,11 +947,11 @@ void lcdLogWaitBtn(uint8_t waitForBtn, char const *formattedText, ...){
 }
 
 void lcdLogWaitMs(uint64_t waitTimeMs, char const *formattedText, ...){
-    char newText[ANZAHL_SPALTEN];
+    char newText[ANZAHL_SPALTEN_LOG];
     //prepare new text
     va_list arglist;
     va_start(arglist, formattedText);
-    vsnprintf(newText, ANZAHL_SPALTEN, formattedText, arglist);
+    vsnprintf(newText, ANZAHL_SPALTEN_LOG, formattedText, arglist);
     lcdLog(newText);
     if (waitTimeMs)
     {

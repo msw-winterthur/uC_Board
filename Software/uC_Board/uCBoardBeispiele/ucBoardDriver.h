@@ -248,6 +248,15 @@ void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
 
 
 /**
+ * \brief   Setze die Anzahl Zeilen, die von den Log-Funktionen verwendet werden.
+ *          Es werden immer die untersten Zeilen verwendet, die freien oberen Zeilen
+ *          können dann mit den lcdWrite Funktionen beschrieben werden.
+ * 
+ * \param linesToUse1_4 Anzahl Zeilen die von den lcdLog-Funktionen verwendet werden.
+ */
+void lcdLogSetLinesToUse(uint8_t linesToUse1_4);
+
+/**
  * \brief   Ein Log wird auf das LCD geschrieben. Der Log erhält automatisch eine Zeilennummer.
  *          Falls mehrmals die selbe Nachricht hintereinander gelogt wird, wird nur die
  *          Zeilennummer aktualisiert. Die Idee ist, dass das Display nur für den Log und für
