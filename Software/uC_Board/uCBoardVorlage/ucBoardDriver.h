@@ -100,10 +100,7 @@ uint8_t ledRead(uint8_t ledNr0_15);
 /**
  * \brief Gibt an ob die Schalter (PortC) aktiv High oder Low sind (default: 1)
  */
-#ifndef SWITCH_ACTIV_HIGH
-    #define SWITCH_ACTIV_HIGH   1
-#endif
-
+#define SWITCH_ACTIV_HIGH   1
 
 /**
  * \brief Liest die Schalter (PortC) ein

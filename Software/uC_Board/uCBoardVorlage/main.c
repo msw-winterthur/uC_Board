@@ -32,7 +32,6 @@
 \*********************************************************************************/
 
 //uC-Board-Treiber hinzufügen
-#define SWITCH_ACTIV_HIGH   1 //Sind die Schalter an PortC active Low oder High?
 #include "ucBoardDriver.h"
 
 //Hauptprogramm
