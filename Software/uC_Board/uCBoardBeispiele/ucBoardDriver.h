@@ -53,9 +53,10 @@ uint64_t getSystemTimeMs(void);
  * 
  * \param systemTimeToWaitForMS Auf diese Systemzeit wird gewartet.
  * 
- * \return uint8_t Ist gleich 0 falls die abzuwartende Zeit bereits vorbei ist.
+ * \return uint64_t Gibt 0 zurück wenn alles ok ist. Falls die abzuwartende Zeit bereits vorbei
+ *                  war, wird angegeben wie lange (ms) dieser Zeitpunkt bereits vergangen war.
  */
-uint8_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS);
+uint64_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS);
 
 
 /*************************************************************************************************/

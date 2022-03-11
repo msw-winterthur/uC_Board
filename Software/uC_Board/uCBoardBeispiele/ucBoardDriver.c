@@ -415,13 +415,13 @@ uint64_t getSystemTimeMs(void)
     return systemTimeMs;
 }
 
-uint8_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS){
+uint64_t waitForSystemTimeMs(uint64_t systemTimeToWaitForMS){
     if (systemTimeToWaitForMS < systemTimeMs)
     {
-        return 0;
+        return systemTimeMs - systemTimeToWaitForMS;
     }
     while(systemTimeToWaitForMS > systemTimeMs);
-    return 1;
+    return 0;
 }
 
 
