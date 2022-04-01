@@ -226,7 +226,33 @@ void lcdLight(uint8_t helligkeit);
 
 /**
  * \brief   Schreibt einen Text auf das LCD. Der Text darf formatiert sein:
- *          https://de.wikipedia.org/wiki/Printf
+ *          
+ *          variable=15;
+ *          lcdWriteText(0,0,"Hallo %u, %u", variable, 7);
+ *          schreibt auf dem LCD Zeile 0, Spalte 0 den Text:
+ *          Hallo 15, 7
+ *          
+ *          anstatt %u können auch andere Platzhalter eingefügt werden, das
+ *          Format ist immer:
+ *          
+ *          %[0][n][d] wobei
+ *          %   immer gebraucht wird
+ *          [d] den Datentypen angibt (immer gebraucht, siehe Tabelle), z.B.: %u,    ergibt: "15"
+ *          [n] minimale Anzahl Stellen (kann weggelassen werden), z.B.: %3u         ergibt: " 15"
+ *          [0] vordere Stellen mit 0 auffüllen (kann weggelassen werden, z.B.: %03u ergibt: "015"
+ *
+ *          Datentyp:   Platzhalter:        Bedeutung:          Beispiele:
+ *          uint8_t     %u                  unsigned            %u, %2u, %03u
+ *          int8_t      %i                  integer             %i, %3i, %02i
+ *          uint16_t    %u                  unsigned            %u, %2u, %03u
+ *          int16_t     %i                  integer             %i, %3i, %02i
+ *          uint32_t    %lu                 long unsigned       %lu, %2lu, %03lu    
+ *          int32_t     %li                 long integer        %li, %3li, %02li
+ *          uint64_t    NICHT UNTERTÜTZT -> uint64_t Variablen mit %lu (nur 32Bit!!!) ausgeben
+ *          int64_t     NICHT UNTERTÜTZT -> int64_t Variablen mit %li (nur 32Bit!!!) ausgeben
+ *          float       NICHT UNTERTÜTZT -> float Variablen mit %i, %li (nur Ganzzahl!!!) ausgeben
+ *          char        %c                  char                %c
+ *          string      %s                  string              %s
  * 
  * \param zeile0_3      Auf welcher Zeile von 0...3 soll geschrieben werden?
  * \param spalte0_19    Ab welcher Spalte von 0...19 soll geschirebene werden?
