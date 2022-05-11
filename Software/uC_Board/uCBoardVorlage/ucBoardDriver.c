@@ -753,11 +753,11 @@ void writeLcdF(uint16_t rs, uint16_t value)
 //------------------------------------------------------------
 void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...)
 {
-    #define MAX_STRING_SIZE 21
-    char text[MAX_STRING_SIZE];
+    #define MAX_LINE_SIZE 21
+    char text[MAX_LINE_SIZE];
     va_list arglist;
     va_start(arglist, formattedText);
-    vsnprintf(text, MAX_STRING_SIZE, formattedText, arglist);
+    vsnprintf(text, MAX_LINE_SIZE, formattedText, arglist);
     uint8_t str_p = 0;
     uint8_t pos;
     pos = spalte0_19 + (zeile0_3 * 0x20);
@@ -766,6 +766,27 @@ void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedTex
     while(text[str_p])
     { writeLcdF('D',text[str_p++]);
     }
+}
+
+void lcdShowText(char const *formattedText, ...)
+{
+    #define MAX_STRING_SIZE 81
+    char text[MAX_STRING_SIZE];
+    va_list arglist;
+    va_start(arglist, formattedText);
+    vsnprintf(text, MAX_STRING_SIZE, formattedText, arglist);
+    //Mit Spacec auffüllen
+    uint16_t length = strlen(text);
+    for (uint16_t i=length; i<MAX_STRING_SIZE; i=i+1)
+    {
+        text[i]=' ';
+    }
+    text[MAX_STRING_SIZE-1]=0;
+    
+    lcdWriteText(0,0,text);
+    lcdWriteText(1,0,text+20);
+    lcdWriteText(2,0,text+40);
+    lcdWriteText(3,0,text+60); 
 }
 
 //------------------------------------------------------------

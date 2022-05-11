@@ -261,6 +261,15 @@ void lcdLight(uint8_t helligkeit);
 void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...);
 
 /**
+ * \brief   Schreibt einen Text auf das LCD. Der Text startet oben links, Zeilenumbrüche
+ *          werden automatisch eingefügt.
+ * 
+ * \param formattedText     Formatierter Text, z.B: "Hallo %d", 5
+ *
+ */
+void lcdShowText(char const *formattedText, ...);
+
+/**
  * \brief Schreibt eine Zahl mit maximal 20 Stellen auf das Display
  * 
  * \param zeile0_3          Auf welcher Zeile von 0...3 soll geschrieben werden?
@@ -272,6 +281,9 @@ void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedTex
  */
 void lcdWriteZahl(  uint8_t zeile0_3, uint8_t spalte0_19, uint64_t zahl,
                     uint8_t vorKommaStellen, uint8_t nachKommaStellen);
+
+
+
 
 
 /**
