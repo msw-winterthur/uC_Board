@@ -31237,8 +31237,10 @@ LEDs 8...15
 <pinref part="C18" gate="G$1" pin="1"/>
 <pinref part="Q2" gate="G$1" pin="2"/>
 <wire x1="226.06" y1="180.34" x2="218.44" y2="180.34" width="0.1524" layer="91"/>
-<pinref part="IC2" gate="1" pin="(ALE)PG2"/>
-<wire x1="218.44" y1="180.34" x2="203.2" y2="180.34" width="0.1524" layer="91"/>
+<pinref part="IC2" gate="1" pin="(TOSC2)PG3"/>
+<wire x1="203.2" y1="182.88" x2="208.28" y2="182.88" width="0.1524" layer="91"/>
+<wire x1="208.28" y1="182.88" x2="208.28" y2="180.34" width="0.1524" layer="91"/>
+<wire x1="208.28" y1="180.34" x2="218.44" y2="180.34" width="0.1524" layer="91"/>
 <junction x="218.44" y="180.34"/>
 </segment>
 </net>
