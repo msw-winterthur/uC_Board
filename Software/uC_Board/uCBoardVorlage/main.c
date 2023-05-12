@@ -34,13 +34,16 @@
 //uC-Board-Treiber hinzufügen
 #include "ucBoardDriver.h"
 
+//Konstanten
+
+
 //Hauptprogramm
 int main(void)
 {
     //Variablen
     
     //Initialisieren
-    initBoard(1);
+    initBoard(0);
     
     //Unendlichschlaufe
     while(1)
