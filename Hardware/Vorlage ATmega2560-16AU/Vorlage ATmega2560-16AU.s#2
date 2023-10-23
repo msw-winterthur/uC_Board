@@ -29838,8 +29838,8 @@ Source: VISHAY wscwsn.pdf</description>
 <part name="P+31" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device=""/>
 <part name="GND40" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C26" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1206" package3d_urn="urn:adsk.eagle:package:23618/2" value="100nF"/>
-<part name="R37" library="rcl" deviceset="R-EU_" device="R0805" value="5.1k"/>
-<part name="R38" library="rcl" deviceset="R-EU_" device="R0805" value="5.1k"/>
+<part name="R37" library="rcl" deviceset="R-EU_" device="R0603"/>
+<part name="R38" library="rcl" deviceset="R-EU_" device="R0603"/>
 </parts>
 <sheets>
 <sheet>
@@ -30052,11 +30052,6 @@ z.B. RGB-Streifen</text>
 <text x="220.98" y="287.02" size="1.778" layer="97" rot="R90">X5 und
 LEDs 8...15
 (PB0 = LED8)</text>
-<text x="53.34" y="-184.15" size="1.016" layer="97">Pull-Down Widerstände für CC-Pins
---&gt; Geben dem PSU infos über die Steckrichtung &amp; den Verbindungsstatus</text>
-<text x="74.168" y="-169.672" size="1.016" layer="97">Pull-Down Widerstände 0805
---&gt; Sind für 250mA dimensioniert, 
-müssen für mehr angepasst werden!</text>
 </plain>
 <instances>
 <instance part="C12" gate="G$1" x="119.38" y="285.75" smashed="yes">
@@ -31074,13 +31069,13 @@ müssen für mehr angepasst werden!</text>
 <attribute name="NAME" x="202.184" y="-160.909" size="1.778" layer="95"/>
 <attribute name="VALUE" x="205.359" y="-169.926" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R37" gate="G$1" x="64.77" y="-171.45" smashed="yes" rot="R90">
-<attribute name="NAME" x="63.2714" y="-175.26" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="68.072" y="-175.26" size="1.778" layer="96" rot="R90"/>
+<instance part="R37" gate="G$1" x="71.12" y="-171.45" smashed="yes" rot="R90">
+<attribute name="NAME" x="69.6214" y="-175.26" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="74.422" y="-175.26" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R38" gate="G$1" x="72.39" y="-171.45" smashed="yes" rot="R90">
-<attribute name="NAME" x="70.8914" y="-175.26" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="75.692" y="-175.26" size="1.778" layer="96" rot="R90"/>
+<instance part="R38" gate="G$1" x="80.01" y="-171.45" smashed="yes" rot="R90">
+<attribute name="NAME" x="78.5114" y="-175.26" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="83.312" y="-175.26" size="1.778" layer="96" rot="R90"/>
 </instance>
 </instances>
 <busses>
@@ -31263,11 +31258,9 @@ müssen für mehr angepasst werden!</text>
 <pinref part="C14" gate="G$1" pin="-"/>
 <wire x1="125.73" y1="-180.34" x2="125.73" y2="-182.88" width="0.1524" layer="91"/>
 <wire x1="55.88" y1="-170.18" x2="55.88" y2="-180.34" width="0.1524" layer="91"/>
-<wire x1="55.88" y1="-180.34" x2="64.77" y2="-180.34" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="-180.34" x2="99.06" y2="-180.34" width="0.1524" layer="91"/>
 <junction x="125.73" y="-180.34"/>
 <pinref part="C6" gate="G$1" pin="2"/>
-<wire x1="64.77" y1="-180.34" x2="72.39" y2="-180.34" width="0.1524" layer="91"/>
-<wire x1="72.39" y1="-180.34" x2="99.06" y2="-180.34" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="-180.34" x2="125.73" y2="-180.34" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="-172.72" x2="99.06" y2="-180.34" width="0.1524" layer="91"/>
 <junction x="99.06" y="-180.34"/>
@@ -31280,12 +31273,6 @@ müssen für mehr angepasst werden!</text>
 <pinref part="U$2" gate="G$1" pin="GND1"/>
 <wire x1="45.72" y1="-157.48" x2="55.88" y2="-157.48" width="0.1524" layer="91"/>
 <wire x1="55.88" y1="-157.48" x2="55.88" y2="-170.18" width="0.1524" layer="91"/>
-<wire x1="64.77" y1="-176.53" x2="64.77" y2="-180.34" width="0.1524" layer="91"/>
-<junction x="64.77" y="-180.34"/>
-<wire x1="72.39" y1="-176.53" x2="72.39" y2="-180.34" width="0.1524" layer="91"/>
-<junction x="72.39" y="-180.34"/>
-<pinref part="R37" gate="G$1" pin="1"/>
-<pinref part="R38" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="+5V-POWER" gate="G$1" pin="C"/>
@@ -33221,18 +33208,12 @@ müssen für mehr angepasst werden!</text>
 <segment>
 <pinref part="U$2" gate="G$1" pin="CC1"/>
 <wire x1="45.72" y1="-162.56" x2="58.42" y2="-162.56" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="-162.56" x2="72.39" y2="-162.56" width="0.1524" layer="91"/>
-<wire x1="72.39" y1="-162.56" x2="72.39" y2="-166.37" width="0.1524" layer="91"/>
-<pinref part="R38" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="N$10" class="0">
 <segment>
 <pinref part="U$2" gate="G$1" pin="CC2"/>
 <wire x1="45.72" y1="-165.1" x2="58.42" y2="-165.1" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="-165.1" x2="64.77" y2="-165.1" width="0.1524" layer="91"/>
-<wire x1="64.77" y1="-165.1" x2="64.77" y2="-166.37" width="0.1524" layer="91"/>
-<pinref part="R37" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="PH5" class="0">
