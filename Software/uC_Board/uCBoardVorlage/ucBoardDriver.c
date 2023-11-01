@@ -391,6 +391,7 @@ uint8_t buttonReadJoyStickPE2(void)
 
 void startSystemTimeMs(void)
 {
+    sei();            // Global interrups aktivieren
     TCCR0A = 0b00000011; // Timer mode einstellungen -> Fast PWM mode 10 Bit
     TCCR0B = 0b00001011; // 16Mhz / 64 = 250kHz -> 4us per step
     TIMSK0 = 0b00000001; // Timer overflow Interrupt aktivieren
