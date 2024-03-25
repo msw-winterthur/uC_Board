@@ -391,7 +391,6 @@ uint8_t buttonReadJoyStickPE2(void)
 
 void startSystemTimeMs(void)
 {
-    sei();            // Global interrups aktivieren
     TCCR0A = 0b00000011; // Timer mode einstellungen -> Fast PWM mode 10 Bit
     TCCR0B = 0b00001011; // 16Mhz / 64 = 250kHz -> 4us per step
     TIMSK0 = 0b00000001; // Timer overflow Interrupt aktivieren
@@ -519,42 +518,24 @@ void initAdc(void)
     DIDR0  = 0x0F;    // Digitale Register an ADC pins der Potentiometer deaktivieren
     DIDR2  = 0xFF;
     
-    ADCSRA = 0b10100111; // ADC einschalten, ADC clok = 16MHz / 128 --> 8us/cycle
+    ADCSRA = 0b10000111; // ADC einschalten, ADC clok = 16MHz / 128 --> 8us/cycle
     ADCSRB = 0x00;    // Free runing mode
     
-    ADCSRA |=  0b01000000;        // Dummy messung Starten
-    while((ADCSRA&0x10) == 0);    // Warten bis Messung abgeschllossen
-    
-    ADCSRA &= 0xEF;                // Interruptflage löschen
+  
 }
 
 uint16_t adcRead(adcChannel_t kanal)
 {
-    uint16_t messwert = 0;
-    
     // Kanal definieren
-    ADMUX  = 0x40;    //AVCC Als referenz
-    if(kanal>=8)
-    {    ADMUX  |= kanal-8;
-        ADCSRB |= (3 << MUX5);
-    }
-    else
-    {    ADMUX  |= kanal;
-        ADCSRB &= ~(3 << MUX5);
-    }
     
+    ADMUX=(ADMUX&=0xf0)|(kanal&0x07);		//write ls3b to ADMUX
+
+    ADCSRB = (ADCSRB&~0x08)|(kanal&0x08);		//write msb to ADCSRB
     
-    ADCSRA |=  0b01000000;        // ADC Starten
-    while((ADCSRA&0x10) == 0);    // Warten bis Messung abgeschllossen
+    ADCSRA |= _BV(ADSC);	 	// ADC Starten
+    while(ADCSRA & _BV(ADSC));// Warten bis Messung abgeschllossen
     
-    _delay_us(300);//25 ADC clock cycles
-    
-    messwert = ADCL;
-    messwert |= ADCH <<8;
-    
-    ADCSRA &= 0xEF;                // Interruptflage löschen
-    
-    return messwert;
+    return ADC;
 }
 
 
