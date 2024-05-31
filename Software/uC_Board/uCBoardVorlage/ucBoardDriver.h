@@ -49,7 +49,7 @@ uint64_t getSystemTimeMs(void);
 
 
 /**
- * \brief Wartet auf eine bestimte Systemzeit, eignet sich um getaktete Programme zu schreiben.
+ * \brief Wartet auf eine bestimmte Systemzeit, eignet sich um getaktete Programme zu schreiben.
  * 
  * \param systemTimeToWaitForMS Auf diese Systemzeit wird gewartet.
  * 
