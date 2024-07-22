@@ -32846,9 +32846,6 @@ LEDs 8...15
 (PB0 = LED8)</text>
 <text x="53.34" y="-184.15" size="1.016" layer="97">Pull-Down Widerstände für CC-Pins
 --&gt; Geben dem PSU infos über die Steckrichtung &amp; den Verbindungsstatus</text>
-<text x="74.168" y="-169.672" size="1.016" layer="97">Pull-Down Widerstände 0805
---&gt; Sind für 250mA dimensioniert, 
-müssen für mehr angepasst werden!</text>
 <wire x1="5.08" y1="66.04" x2="191.77" y2="66.04" width="0.1524" layer="97"/>
 <wire x1="191.77" y1="66.04" x2="191.77" y2="123.19" width="0.1524" layer="97"/>
 <wire x1="278.13" y1="-222.25" x2="278.13" y2="-273.05" width="0.1524" layer="97"/>
