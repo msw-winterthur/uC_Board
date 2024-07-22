@@ -32634,6 +32634,8 @@ Source: http://www.diodes.com/datasheets/ds23001.pdf</description>
 <part name="C27" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="22nF"/>
 <part name="GND32" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND37" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="S13" library="SmartPrj" deviceset="TS42_4PAD" device="" value=""/>
+<part name="GND39" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -32853,6 +32855,7 @@ LEDs 8...15
 <wire x1="361.95" y1="-273.05" x2="361.95" y2="-222.25" width="0.1524" layer="97"/>
 <wire x1="361.95" y1="-222.25" x2="278.13" y2="-222.25" width="0.1524" layer="97"/>
 <text x="290.83" y="-269.24" size="1.778" layer="97">LED Helligkeit mit PWM</text>
+<text x="110.49" y="330.2" size="1.778" layer="97">Reset</text>
 </plain>
 <instances>
 <instance part="C12" gate="G$1" x="119.38" y="285.75" smashed="yes">
@@ -33903,6 +33906,12 @@ LEDs 8...15
 <instance part="GND37" gate="1" x="342.9" y="-259.08" smashed="yes">
 <attribute name="VALUE" x="340.36" y="-261.62" size="1.778" layer="96"/>
 </instance>
+<instance part="S13" gate="G$1" x="113.03" y="335.28" smashed="yes" rot="R270">
+<attribute name="NAME" x="111.76" y="340.36" size="1.778" layer="95"/>
+</instance>
+<instance part="GND39" gate="1" x="107.95" y="327.66" smashed="yes">
+<attribute name="VALUE" x="105.41" y="325.12" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -34315,6 +34324,14 @@ LEDs 8...15
 <pinref part="GND37" gate="1" pin="GND"/>
 <wire x1="342.9" y1="-248.92" x2="342.9" y2="-256.54" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="S13" gate="G$1" pin="2"/>
+<pinref part="S13" gate="G$1" pin="1"/>
+<wire x1="107.95" y1="332.74" x2="107.95" y2="335.28" width="0.1524" layer="91"/>
+<pinref part="GND39" gate="1" pin="GND"/>
+<wire x1="107.95" y1="332.74" x2="107.95" y2="330.2" width="0.1524" layer="91"/>
+<junction x="107.95" y="332.74"/>
+</segment>
 </net>
 <net name="VCC" class="1">
 <segment>
@@ -34686,10 +34703,17 @@ LEDs 8...15
 <pinref part="R10" gate="G$1" pin="1"/>
 <pinref part="IC2" gate="1" pin="RESET"/>
 <wire x1="132.08" y1="325.12" x2="129.54" y2="325.12" width="0.1524" layer="91"/>
-<wire x1="129.54" y1="325.12" x2="129.54" y2="337.82" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="325.12" x2="129.54" y2="332.74" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="332.74" x2="129.54" y2="337.82" width="0.1524" layer="91"/>
 <wire x1="129.54" y1="325.12" x2="127" y2="325.12" width="0.1524" layer="91"/>
 <junction x="129.54" y="325.12"/>
 <label x="127" y="326.39" size="1.778" layer="95" rot="R180"/>
+<pinref part="S13" gate="G$1" pin="3"/>
+<pinref part="S13" gate="G$1" pin="4"/>
+<wire x1="118.11" y1="335.28" x2="118.11" y2="332.74" width="0.1524" layer="91"/>
+<wire x1="118.11" y1="332.74" x2="129.54" y2="332.74" width="0.1524" layer="91"/>
+<junction x="118.11" y="332.74"/>
+<junction x="129.54" y="332.74"/>
 </segment>
 <segment>
 <pinref part="JTAG" gate="A" pin="6"/>
