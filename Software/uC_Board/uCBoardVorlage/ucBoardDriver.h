@@ -261,6 +261,17 @@ void lcdLight(uint8_t helligkeit);
 void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedText, ...);
 
 /**
+ * \brief Speichert ein eigenes Symbol auf dem LCD. Das Symbol kann nach dem Speichern mit
+ * lcdWriteText(0,0,"%c",symbolAddr1_7); angezeigt werden.
+ * 
+ * \param symbolAddr1_7 Adresse an welcher das Symbol gespeichert wird.
+ * \param BITMAP Bitmap des Symbols, siehe https://maxpromer.github.io/LCD-Character-Creator/ 
+ * 
+ * \return void
+ */
+void lcdCreateCustomChar(uint8_t symbolAddr1_7, const uint8_t BITMAP[]);
+
+/**
  * \brief   Schreibt einen Text auf das LCD. Der Text startet oben links, Zeilenumbrüche
  *          werden automatisch eingefügt.
  * 

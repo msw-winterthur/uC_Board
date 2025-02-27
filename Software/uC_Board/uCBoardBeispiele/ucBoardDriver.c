@@ -750,6 +750,29 @@ void lcdWriteText(uint8_t zeile0_3, uint8_t spalte0_19, char const *formattedTex
     }
 }
 
+
+void lcdCreateCustomChar(uint8_t symbolAddr1_7, const uint8_t BITMAP[]){
+    #define CG_RAM_ADRESS       0b01000000
+    #define COMMAND             'C'
+    #define DATA                'D'
+    #define SYMBOL_LINES        8
+    #define MIN_ADDR            1
+    #define MAX_ADDR            7
+    if (symbolAddr1_7>=MIN_ADDR && symbolAddr1_7 <= MAX_ADDR)
+    {
+        writeLcdF(COMMAND,CG_RAM_ADRESS|(symbolAddr1_7<<3));
+        for (uint8_t i=0;i<SYMBOL_LINES;i=i+1)
+        {
+            writeLcdF(DATA,BITMAP[i]);
+        }
+    } 
+    else
+    {
+        while(1);//Invalid Symbol Address
+    }
+    
+}
+
 void lcdShowText(char const *formattedText, ...)
 {
     #define MAX_STRING_SIZE 81
